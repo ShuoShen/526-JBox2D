@@ -27,6 +27,7 @@
 package org.jbox2d.testbed.framework;
 
 import org.jbox2d.testbed.tests.ApplyForce;
+import org.jbox2d.testbed.tests.ObjectFallingTest;
 import org.jbox2d.testbed.tests.BlobTest4;
 import org.jbox2d.testbed.tests.BodyTypes;
 import org.jbox2d.testbed.tests.Breakable;
@@ -71,6 +72,9 @@ public class TestList {
   
   public static void populateModel(TestbedModel argModel){
       
+	  argModel.addCategory("526 Project");
+	  argModel.addTest(new ObjectFallingTest());
+	  
       argModel.addCategory("Featured");
       argModel.addTest(new DominoTest());
       argModel.addTest(new CompoundShapesTest());
