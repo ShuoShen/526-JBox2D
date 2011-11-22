@@ -64,6 +64,7 @@ import org.jbox2d.testbed.tests.VaryingFrictionTest;
 import org.jbox2d.testbed.tests.VaryingRestitution;
 import org.jbox2d.testbed.tests.VerticalStack;
 import org.jbox2d.testbed.tests.Web;
+import org.jbox2d.testbed.tests.StickTest;
 
 /**
  * @author Daniel Murphy
@@ -74,6 +75,7 @@ public class TestList {
       
 	  argModel.addCategory("526 Project");
 	  argModel.addTest(new ObjectFallingTest());
+	  argModel.addTest(new StickTest());
 	  
       argModel.addCategory("Featured");
       argModel.addTest(new DominoTest());
