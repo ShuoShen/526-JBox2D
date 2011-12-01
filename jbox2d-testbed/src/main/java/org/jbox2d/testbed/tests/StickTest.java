@@ -26,7 +26,6 @@
  */
 package org.jbox2d.testbed.tests;
 
-import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.MathUtils;
 import org.jbox2d.common.Vec2;
@@ -45,6 +44,8 @@ public class StickTest extends TestbedTest {
 	
 	private RevoluteJoint m_joint;
 	private boolean isLeft = false;
+	float prevDiffAngle = 0.0f;
+	Body body1;
 	
 	/**
 	 * @see org.jbox2d.testbed.framework.TestbedTest#initTest(boolean)
@@ -70,26 +71,51 @@ public class StickTest extends TestbedTest {
 			BodyDef bd1 = new BodyDef();
 			bd1.type = BodyType.DYNAMIC;
 			bd1.position.set(0.0f, 30.0f);
-			Body body1 = getWorld().createBody(bd1);
+			body1 = getWorld().createBody(bd1);
 			bd1.position.set(0.0f, 34.0f);
+			bd1.type = BodyType.STATIC;
 			Body body2 = getWorld().createBody(bd1);
 			body1.createFixture(shape, 5.0f);
-			body2.createFixture(shape, 5.0f);
+			body2.createFixture(shape, 0f);
 			
 			
 			rjd.initialize(body2, body1, new Vec2(0.0f, 32f));
 			rjd.motorSpeed = -1.0f * MathUtils.PI;
 			rjd.maxMotorTorque = 10000.0f;
 			rjd.enableMotor = false;
-			rjd.lowerAngle = -0.25f * MathUtils.PI;
-			rjd.upperAngle = 0.5f * MathUtils.PI;
-			rjd.enableLimit = true;
+			//rjd.lowerAngle = -0.25f * MathUtils.PI;
+			//rjd.upperAngle = 0.5f * MathUtils.PI;
+			//rjd.enableLimit = true;
 			
 			//rjd.collideConnected = true;
-			
+			getWorld().setGravity(new Vec2(0f,0f));
 			m_joint = (RevoluteJoint) getWorld().createJoint(rjd);
 		}
 	}
+	
+	public void pdController(Body body, float targetAngle, float currentAngle){
+		
+		float angVel, angMomentum, P, I, D, diffAngle, derivDiffAngle, dt = 1/60f;
+
+		float integDiffAngle = 0.0f;
+		float P0 = 70, I0 = 30, D0 = 250;
+		
+		  // Find the target  
+
+		diffAngle = targetAngle - currentAngle;
+		integDiffAngle = integDiffAngle + diffAngle * dt;
+		derivDiffAngle = (diffAngle - prevDiffAngle) / dt;
+
+		P = P0 * diffAngle;
+		I = I0 * integDiffAngle;
+		D = D0 * derivDiffAngle;
+
+		angMomentum = P + I + D;
+		body.applyTorque(angMomentum);
+		System.out.println(currentAngle);
+		prevDiffAngle = diffAngle;
+	}
+	
 	
 	/**
 	 * @see org.jbox2d.testbed.framework.TestbedTest#step(org.jbox2d.testbed.framework.TestbedSettings)
@@ -100,7 +126,14 @@ public class StickTest extends TestbedTest {
 		//addTextLine("Limits " + (m_joint.isLimitEnabled() ? "on" : "off") + ", Motor "
 		//		+ (m_joint.isMotorEnabled() ? "on " : "off ") + (isLeft ? "left" : "right"));
 		//addTextLine("Keys: (l) limits, (m) motor, (a) left, (d) right");
-		
+		float dt = 1/60f;
+		float currentAngle = m_joint.getJointAngle();
+		float targetAngle = MathUtils.PI / 6;
+		if(Math.abs(targetAngle - currentAngle) < 0.1f){
+			targetAngle *= -1;
+		}
+		pdController(body1, targetAngle, currentAngle);
+		//System.out.println(currentAngle);
 	}
 	
 	/**
