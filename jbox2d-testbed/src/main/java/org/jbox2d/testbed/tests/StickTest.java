@@ -128,7 +128,7 @@ public class StickTest extends TestbedTest {
 		//addTextLine("Keys: (l) limits, (m) motor, (a) left, (d) right");
 		float dt = 1/60f;
 		float currentAngle = m_joint.getJointAngle();
-		float targetAngle = MathUtils.PI / 6;
+		float targetAngle = MathUtils.PI / 2;
 		if(Math.abs(targetAngle - currentAngle) < 0.1f){
 			targetAngle *= -1;
 		}

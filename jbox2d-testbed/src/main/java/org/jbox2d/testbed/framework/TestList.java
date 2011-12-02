@@ -27,6 +27,8 @@
 package org.jbox2d.testbed.framework;
 
 import org.jbox2d.testbed.tests.ApplyForce;
+import org.jbox2d.testbed.tests.CheetahModel;
+import org.jbox2d.testbed.tests.LampModel;
 import org.jbox2d.testbed.tests.ObjectFallingTest;
 import org.jbox2d.testbed.tests.BlobTest4;
 import org.jbox2d.testbed.tests.BodyTypes;
@@ -49,6 +51,7 @@ import org.jbox2d.testbed.tests.Gears;
 import org.jbox2d.testbed.tests.LineJointTest;
 import org.jbox2d.testbed.tests.LiquidTest;
 import org.jbox2d.testbed.tests.OneSidedTest;
+import org.jbox2d.testbed.tests.PlayAround;
 import org.jbox2d.testbed.tests.PolyShapes;
 import org.jbox2d.testbed.tests.PrismaticTest;
 import org.jbox2d.testbed.tests.Pulleys;
@@ -74,7 +77,10 @@ public class TestList {
   public static void populateModel(TestbedModel argModel){
       
 	  argModel.addCategory("526 Project");
-	  argModel.addTest(new ObjectFallingTest());
+	  argModel.addTest(new LampModel());
+	  argModel.addTest(new CheetahModel());
+	  argModel.addTest(new PlayAround());
+	  
 	  argModel.addTest(new StickTest());
 	  
       argModel.addCategory("Featured");
