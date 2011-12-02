@@ -46,12 +46,14 @@ public class StickTest extends TestbedTest {
 	private boolean isLeft = false;
 	Body body1;
 	Body body2;
+	Body body[] = new Body[5];
 	PIDController con1, con2;
 	int kick = 0;
 	float time = 0;
 	float targetAngle = -MathUtils.PI / 2;
 	float timeStep = 2f;
 	float phase = 0;
+	float L = 2.0f, W = 0.5f , H = 0.5f;
 	/**
 	 * @see org.jbox2d.testbed.framework.TestbedTest#initTest(boolean)
 	 */
@@ -71,22 +73,23 @@ public class StickTest extends TestbedTest {
 			float hight = 3;
 			RevoluteJointDef rjd = new RevoluteJointDef();
 			PolygonShape shape = new PolygonShape();
-		
-			shape.setAsBox(0.5f, 2.0f);
-			BodyDef bd1 = new BodyDef();
-			bd1.type = BodyType.DYNAMIC;
-			bd1.position.set(0.0f, hight);
-			body1 = getWorld().createBody(bd1);
-			bd1.position.set(0.0f, hight+4.0f);
+			shape.setAsBox(W, L);
+			BodyDef bd = new BodyDef();
+			bd.type = BodyType.DYNAMIC;
+			bd.position.set(0.0f, H + 2.5f * L);
+			body[0] = getWorld().createBody(bd);
 			
-			body2 = getWorld().createBody(bd1);
+			
+			bd.position.set(0.0f, hight+4.0f);
+			
+			body2 = getWorld().createBody(bd);
 			
 			body1.createFixture(shape, 1.0f);
 			body2.createFixture(shape, 1f);
 			
-			bd1.position.set(0.0f, hight + 8.0f);
-			bd1.type = BodyType.DYNAMIC;
-			Body body3 = getWorld().createBody(bd1);
+			bd.position.set(0.0f, hight + 8.0f);
+			bd.type = BodyType.DYNAMIC;
+			Body body3 = getWorld().createBody(bd);
 			body3.createFixture(shape, 5f);
 			
 			
@@ -102,6 +105,7 @@ public class StickTest extends TestbedTest {
 			getWorld().setGravity(new Vec2(0f,0f));
 			m_joint = (RevoluteJoint) getWorld().createJoint(rjd);
 			rjd.upperAngle = 0.5f * MathUtils.PI;
+			rjd.lowerAngle = -0.5f * MathUtils.PI;
 			rjd.initialize(body3, body2, new Vec2(0.0f, hight+ 6f));
 			m_joint2 = (RevoluteJoint) getWorld().createJoint(rjd);
 			con1 = new PIDController(body1, m_joint);
@@ -125,7 +129,7 @@ public class StickTest extends TestbedTest {
 			this.targetAngle = targetAngle;
 			float angMomentum, P, I, D, diffAngle, derivDiffAngle, dt = 1/60f;
 			float integDiffAngle = 0.0f;
-			float P0 = 100f, I0 = 0, D0 = 400;
+			float P0 = 400f, I0 = 0, D0 = 400;
 			D0 = MathUtils.sqrt(4 * body.getMass() * P0);
 			currentAngle = myJoint.getJointAngle();
 			diffAngle = targetAngle - currentAngle;
@@ -139,7 +143,7 @@ public class StickTest extends TestbedTest {
 			
 			//gravity compensation
 			
-			//System.out.println(myJoint.m_localAnchor1);
+			//System.out.println(diffAngle);
 			Body bodyB;
 			if(myJoint.m_bodyA.equals(body)){
 				bodyB = myJoint.m_bodyB;
@@ -182,18 +186,29 @@ public class StickTest extends TestbedTest {
 		//System.out.println(body1.getLocalCenter());
 		//pdController(body2, targetAngle, currentAngle, m_joint2);
 		float dAngle = 0;
-		phase = time / timeStep;
-		dAngle = phase * targetAngle;
+		//phase = time / timeStep;
+		//dAngle = phase * targetAngle;
+		System.out.println(con2.currentAngle - targetAngle);
+		if(MathUtils.abs( con2.currentAngle - targetAngle) < 0.1f && phase <= 0){
+			
+			phase = 0.5f;
+			targetAngle *= (-1);
+		}
+		if(phase > 0){
+			phase -= 1/60f;
+			System.out.println(phase);
+		}
+		
 		if(kick != 0) {
 			con1.moveTo(0);
-			con2.moveTo(dAngle);
+			con2.moveTo(targetAngle);
 		}
 			//System.out.println(body2.m_angularVelocity);	
 		time += 1/60f;
 		if(time > timeStep){
-			targetAngle *= (-1);
-			time = 0;
-			System.out.println(targetAngle);
+		//	targetAngle *= (-1);
+		//	time = 0;
+		//	System.out.println(targetAngle);
 		}
 	}
 	
