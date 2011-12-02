@@ -74,7 +74,7 @@ public class TestList {
   public static void populateModel(TestbedModel argModel){
       
 	  argModel.addCategory("526 Project");
-	  argModel.addTest(new ObjectFallingTest());
+	  //argModel.addTest(new ObjectFallingTest());
 	  argModel.addTest(new StickTest());
 	  
       argModel.addCategory("Featured");

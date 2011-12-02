@@ -42,11 +42,16 @@ import org.jbox2d.testbed.framework.TestbedTest;
  */
 public class StickTest extends TestbedTest {
 	
-	private RevoluteJoint m_joint;
+	private RevoluteJoint m_joint, m_joint2;
 	private boolean isLeft = false;
-	float prevDiffAngle = 0.0f;
 	Body body1;
-	
+	Body body2;
+	PIDController con1, con2;
+	int kick = 0;
+	float time = 0;
+	float targetAngle = -MathUtils.PI / 2;
+	float timeStep = 2f;
+	float phase = 0;
 	/**
 	 * @see org.jbox2d.testbed.framework.TestbedTest#initTest(boolean)
 	 */
@@ -63,57 +68,102 @@ public class StickTest extends TestbedTest {
 		}
 		
 		{
-			
+			float hight = 3;
 			RevoluteJointDef rjd = new RevoluteJointDef();
 			PolygonShape shape = new PolygonShape();
 		
 			shape.setAsBox(0.5f, 2.0f);
 			BodyDef bd1 = new BodyDef();
 			bd1.type = BodyType.DYNAMIC;
-			bd1.position.set(0.0f, 30.0f);
+			bd1.position.set(0.0f, hight);
 			body1 = getWorld().createBody(bd1);
-			bd1.position.set(0.0f, 34.0f);
-			bd1.type = BodyType.STATIC;
-			Body body2 = getWorld().createBody(bd1);
-			body1.createFixture(shape, 5.0f);
-			body2.createFixture(shape, 0f);
+			bd1.position.set(0.0f, hight+4.0f);
+			
+			body2 = getWorld().createBody(bd1);
+			
+			body1.createFixture(shape, 1.0f);
+			body2.createFixture(shape, 1f);
+			
+			bd1.position.set(0.0f, hight + 8.0f);
+			bd1.type = BodyType.DYNAMIC;
+			Body body3 = getWorld().createBody(bd1);
+			body3.createFixture(shape, 5f);
 			
 			
-			rjd.initialize(body2, body1, new Vec2(0.0f, 32f));
+			rjd.initialize(body2, body1, new Vec2(0.0f, hight + 2f));
 			rjd.motorSpeed = -1.0f * MathUtils.PI;
 			rjd.maxMotorTorque = 10000.0f;
 			rjd.enableMotor = false;
-			//rjd.lowerAngle = -0.25f * MathUtils.PI;
-			//rjd.upperAngle = 0.5f * MathUtils.PI;
-			//rjd.enableLimit = true;
+			rjd.lowerAngle = -0.25f * MathUtils.PI;
+			rjd.upperAngle = 0 * MathUtils.PI;
+			rjd.enableLimit = true;
 			
 			//rjd.collideConnected = true;
 			getWorld().setGravity(new Vec2(0f,0f));
 			m_joint = (RevoluteJoint) getWorld().createJoint(rjd);
+			rjd.upperAngle = 0.5f * MathUtils.PI;
+			rjd.initialize(body3, body2, new Vec2(0.0f, hight+ 6f));
+			m_joint2 = (RevoluteJoint) getWorld().createJoint(rjd);
+			con1 = new PIDController(body1, m_joint);
+			con2 = new PIDController(body2, m_joint2);
 		}
 	}
 	
-	public void pdController(Body body, float targetAngle, float currentAngle){
+	public class PIDController{
+		float prevDiffAngle = 0f;
+		Body body; 
+		float targetAngle, currentAngle;
+		RevoluteJoint myJoint;
+		public PIDController(Body body, RevoluteJoint myJoint){
+			this.body = body;
+			this.myJoint = myJoint;
+			this.currentAngle = myJoint.getJointAngle();
+		}
 		
-		float angVel, angMomentum, P, I, D, diffAngle, derivDiffAngle, dt = 1/60f;
+		public void moveTo(float targetAngle){
+			
+			this.targetAngle = targetAngle;
+			float angMomentum, P, I, D, diffAngle, derivDiffAngle, dt = 1/60f;
+			float integDiffAngle = 0.0f;
+			float P0 = 100f, I0 = 0, D0 = 400;
+			D0 = MathUtils.sqrt(4 * body.getMass() * P0);
+			currentAngle = myJoint.getJointAngle();
+			diffAngle = targetAngle - currentAngle;
+			integDiffAngle = integDiffAngle + diffAngle * dt;
+			derivDiffAngle = (diffAngle - prevDiffAngle) / dt;
 
-		float integDiffAngle = 0.0f;
-		float P0 = 70, I0 = 30, D0 = 250;
-		
-		  // Find the target  
-
-		diffAngle = targetAngle - currentAngle;
-		integDiffAngle = integDiffAngle + diffAngle * dt;
-		derivDiffAngle = (diffAngle - prevDiffAngle) / dt;
-
-		P = P0 * diffAngle;
-		I = I0 * integDiffAngle;
-		D = D0 * derivDiffAngle;
-
-		angMomentum = P + I + D;
-		body.applyTorque(angMomentum);
-		System.out.println(currentAngle);
-		prevDiffAngle = diffAngle;
+			P = P0 * diffAngle;
+			I = I0 * integDiffAngle;
+			D = D0 * derivDiffAngle;
+			
+			
+			//gravity compensation
+			
+			//System.out.println(myJoint.m_localAnchor1);
+			Body bodyB;
+			if(myJoint.m_bodyA.equals(body)){
+				bodyB = myJoint.m_bodyB;
+			} else {
+				bodyB = myJoint.m_bodyA;
+			}
+			//Vec2 jointPos = new Vec2(0f, 0f);
+			//jointPos.x = MathUtils.sin(rootJoint.m_bodyA.getAngle()) * MathUtils.abs(rootJoint.m_localAnchor1.y) + rootJoint.m_bodyA.getWorldCenter().x;
+			//jointPos.y = MathUtils.cos(rootJoint.m_bodyA.getAngle()) * MathUtils.abs(rootJoint.m_localAnchor1.y) + rootJoint.m_bodyA.getWorldCenter().y;
+			
+			
+			//Vec2 r = body.getWorldCenter().sub(jointPos);
+			//System.out.println(rootJoint.m_bodyA.getAngle() * 180 / 3.14 + " " + rootJoint.m_localAnchor1.y);
+			//float G = Vec2.cross(r, getWorld().getGravity().mul((-1) * body.getMass())) ;
+			angMomentum = P + I + D;
+			
+			body.applyTorque(angMomentum);
+			bodyB.applyTorque(-angMomentum);
+			
+			
+			
+			this.prevDiffAngle = diffAngle;
+			//System.out.println(prevDiffAngle);
+		}
 	}
 	
 	
@@ -126,14 +176,25 @@ public class StickTest extends TestbedTest {
 		//addTextLine("Limits " + (m_joint.isLimitEnabled() ? "on" : "off") + ", Motor "
 		//		+ (m_joint.isMotorEnabled() ? "on " : "off ") + (isLeft ? "left" : "right"));
 		//addTextLine("Keys: (l) limits, (m) motor, (a) left, (d) right");
-		float dt = 1/60f;
-		float currentAngle = m_joint.getJointAngle();
-		float targetAngle = MathUtils.PI / 6;
-		if(Math.abs(targetAngle - currentAngle) < 0.1f){
-			targetAngle *= -1;
+		
+
+		//body1.applyForce( getWorld().getGravity().mul((-1) * body1.getMass()), body1.getWorldCenter());
+		//System.out.println(body1.getLocalCenter());
+		//pdController(body2, targetAngle, currentAngle, m_joint2);
+		float dAngle = 0;
+		phase = time / timeStep;
+		dAngle = phase * targetAngle;
+		if(kick != 0) {
+			con1.moveTo(0);
+			con2.moveTo(dAngle);
 		}
-		pdController(body1, targetAngle, currentAngle);
-		//System.out.println(currentAngle);
+			//System.out.println(body2.m_angularVelocity);	
+		time += 1/60f;
+		if(time > timeStep){
+			targetAngle *= (-1);
+			time = 0;
+			System.out.println(targetAngle);
+		}
 	}
 	
 	/**
@@ -161,7 +222,16 @@ public class StickTest extends TestbedTest {
 				getModel().getKeys()['d'] = false;
 				isLeft = false;
 				break;
+			case 'k' :
+				getModel().getKeys()['k'] = false;
+				kick = 1;
+				break;
 		}
+	}
+	
+	public void reset() {
+		super.reset();
+		kick = 0;
 	}
 	
 	/**
