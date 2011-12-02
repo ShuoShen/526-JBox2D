@@ -32,6 +32,7 @@ import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.BodyType;
+import org.jbox2d.dynamics.FixtureDef;
 import org.jbox2d.dynamics.joints.RevoluteJoint;
 import org.jbox2d.dynamics.joints.RevoluteJointDef;
 import org.jbox2d.testbed.framework.TestbedSettings;
@@ -47,13 +48,20 @@ public class StickTest extends TestbedTest {
 	Body body1;
 	Body body2;
 	Body body[] = new Body[5];
+	RevoluteJoint joint[] = new RevoluteJoint[4];
 	PIDController con1, con2;
+	PIDController con[] = new PIDController[4];
 	int kick = 0;
 	float time = 0;
 	float targetAngle = -MathUtils.PI / 2;
 	float timeStep = 2f;
 	float phase = 0;
-	float L = 2.0f, W = 0.5f , H = 0.5f;
+	float L = 2.0f, W = 0.5f , H = 0.1f;
+	float leg_upper = 0.5f , leg_bottom = 0.5f, leg_width = 0.1f;
+	float body_length = 0.4f, body_width = 0.2f;
+	
+	boolean gSwitch = true;
+	
 	/**
 	 * @see org.jbox2d.testbed.framework.TestbedTest#initTest(boolean)
 	 */
@@ -70,48 +78,65 @@ public class StickTest extends TestbedTest {
 		}
 		
 		{
-			float hight = 3;
-			RevoluteJointDef rjd = new RevoluteJointDef();
 			PolygonShape shape = new PolygonShape();
-			shape.setAsBox(W, L);
+			shape.setAsBox(body_width/2f, body_length/2f);
 			BodyDef bd = new BodyDef();
-			bd.type = BodyType.DYNAMIC;
-			bd.position.set(0.0f, H + 2.5f * L);
+			bd.type = BodyType.STATIC;
+			bd.position.set(0.0f, H + body_length/2 + leg_upper + leg_bottom);
 			body[0] = getWorld().createBody(bd);
-			
-			
-			bd.position.set(0.0f, hight+4.0f);
-			
-			body2 = getWorld().createBody(bd);
-			
-			body1.createFixture(shape, 1.0f);
-			body2.createFixture(shape, 1f);
-			
-			bd.position.set(0.0f, hight + 8.0f);
-			bd.type = BodyType.DYNAMIC;
-			Body body3 = getWorld().createBody(bd);
-			body3.createFixture(shape, 5f);
-			
-			
-			rjd.initialize(body2, body1, new Vec2(0.0f, hight + 2f));
-			rjd.motorSpeed = -1.0f * MathUtils.PI;
-			rjd.maxMotorTorque = 10000.0f;
-			rjd.enableMotor = false;
-			rjd.lowerAngle = -0.25f * MathUtils.PI;
-			rjd.upperAngle = 0 * MathUtils.PI;
-			rjd.enableLimit = true;
-			
+			FixtureDef fd1 = new FixtureDef();
+			fd1.filter.groupIndex = -1;
+			fd1.shape = shape;
+			fd1.density = 0.5f;
+			body[0].createFixture(fd1);
+			createLegs(new Vec2(0, body[0].getWorldCenter().y - body_length/2f), body[0]);
+
 			//rjd.collideConnected = true;
-			getWorld().setGravity(new Vec2(0f,0f));
-			m_joint = (RevoluteJoint) getWorld().createJoint(rjd);
-			rjd.upperAngle = 0.5f * MathUtils.PI;
-			rjd.lowerAngle = -0.5f * MathUtils.PI;
-			rjd.initialize(body3, body2, new Vec2(0.0f, hight+ 6f));
-			m_joint2 = (RevoluteJoint) getWorld().createJoint(rjd);
-			con1 = new PIDController(body1, m_joint);
-			con2 = new PIDController(body2, m_joint2);
+			//getWorld().setGravity(new Vec2(0f,0f));
+			//con1 = new PIDController(body1, m_joint);
+			//con2 = new PIDController(body2, m_joint2);
 		}
 	}
+	
+	public void createLegs(Vec2 p_Pelvis, Body upBody){
+		BodyDef bd = new BodyDef();
+		bd.type = BodyType.DYNAMIC;
+		PolygonShape shape = new PolygonShape();
+		RevoluteJointDef rjd = new RevoluteJointDef();
+		FixtureDef fd1 = new FixtureDef();
+		fd1.filter.groupIndex = -1;
+		for(int i = 0; i < 2; i++){
+			bd.position.set(p_Pelvis.x, p_Pelvis.y - leg_upper/2f);
+			shape.setAsBox(leg_width/2f, leg_upper/2f);
+			body[i * 2 + 1] = getWorld().createBody(bd);
+			fd1.shape = shape;
+			fd1.density = 0.5f;
+			body[i * 2 + 1].createFixture(fd1);
+			rjd.initialize(upBody, body[i * 2 + 1],  p_Pelvis);
+			rjd.lowerAngle = -0.5f * MathUtils.PI;
+			rjd.upperAngle = 0.5f * MathUtils.PI;
+			rjd.enableLimit = true;
+			rjd.collideConnected = false;
+			joint[i*2] = (RevoluteJoint) getWorld().createJoint(rjd);
+			con[i*2] = new PIDController(body[i * 2 + 1], joint[i*2]);
+			
+			bd.position.set(p_Pelvis.x, p_Pelvis.y - leg_upper - leg_bottom/2f);
+			shape.setAsBox(leg_width/2f, leg_bottom/2f);
+			body[i * 2 + 2] = getWorld().createBody(bd);
+			fd1.shape = shape;
+			fd1.density = 0.5f;
+			body[i * 2 + 2].createFixture(fd1);
+			rjd.initialize(body[i * 2 + 2], body[i * 2 + 1], new Vec2(p_Pelvis.x, p_Pelvis.y - leg_upper));
+			rjd.lowerAngle = 0;
+			rjd.upperAngle = 0.5f * MathUtils.PI;
+			rjd.enableLimit = true;
+			rjd.collideConnected = false;
+			joint[i*2 + 1] = (RevoluteJoint) getWorld().createJoint(rjd);
+			con[i*2 + 1] = new PIDController(body[i * 2 + 2], joint[i*2 + 1]);
+		}
+		
+	}
+	
 	
 	public class PIDController{
 		float prevDiffAngle = 0f;
@@ -129,9 +154,10 @@ public class StickTest extends TestbedTest {
 			this.targetAngle = targetAngle;
 			float angMomentum, P, I, D, diffAngle, derivDiffAngle, dt = 1/60f;
 			float integDiffAngle = 0.0f;
-			float P0 = 400f, I0 = 0, D0 = 400;
+			float P0 = 0.1f, I0 = 0, D0;
 			D0 = MathUtils.sqrt(4 * body.getMass() * P0);
 			currentAngle = myJoint.getJointAngle();
+			System.out.println(currentAngle);
 			diffAngle = targetAngle - currentAngle;
 			integDiffAngle = integDiffAngle + diffAngle * dt;
 			derivDiffAngle = (diffAngle - prevDiffAngle) / dt;
@@ -161,7 +187,7 @@ public class StickTest extends TestbedTest {
 			angMomentum = P + I + D;
 			
 			body.applyTorque(angMomentum);
-			bodyB.applyTorque(-angMomentum);
+			//bodyB.applyTorque(-angMomentum);
 			
 			
 			
@@ -188,8 +214,8 @@ public class StickTest extends TestbedTest {
 		float dAngle = 0;
 		//phase = time / timeStep;
 		//dAngle = phase * targetAngle;
-		System.out.println(con2.currentAngle - targetAngle);
-		if(MathUtils.abs( con2.currentAngle - targetAngle) < 0.1f && phase <= 0){
+		//System.out.println(con2.currentAngle - targetAngle);
+		if(MathUtils.abs( con[0].currentAngle - targetAngle) < 0.1f && phase <= 0){
 			
 			phase = 0.5f;
 			targetAngle *= (-1);
@@ -200,8 +226,8 @@ public class StickTest extends TestbedTest {
 		}
 		
 		if(kick != 0) {
-			con1.moveTo(0);
-			con2.moveTo(targetAngle);
+			//con[1].moveTo(0);
+			con[0].moveTo(targetAngle);
 		}
 			//System.out.println(body2.m_angularVelocity);	
 		time += 1/60f;
@@ -239,7 +265,21 @@ public class StickTest extends TestbedTest {
 				break;
 			case 'k' :
 				getModel().getKeys()['k'] = false;
-				kick = 1;
+				if(kick == 0){
+					kick = 1;
+				} else {
+					kick = 0;
+				}
+				break;
+			case 'g':
+				getModel().getKeys()['k'] = false;
+				if (gSwitch){
+					getWorld().setGravity(new Vec2(0f,0f));
+					gSwitch = false;
+				} else {
+					getWorld().setGravity(new Vec2(0f, -10f));
+					gSwitch = true;
+				}
 				break;
 		}
 	}
