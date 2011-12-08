@@ -54,7 +54,7 @@ public class StickTest extends TestbedTest {
 	PIDController con[] = new PIDController[6];
 	int kick = 0;
 	float time = 0;
-	float targetAngle = MathUtils.PI * 2/3;
+	float targetAngle = MathUtils.PI * 5/6;
 	float timeStep = 2f;
 	float phase = 0;
 	float L = 2.0f, W = 0.5f , H = 0.1f;
@@ -114,6 +114,7 @@ public class StickTest extends TestbedTest {
 		FixtureDef fd1 = new FixtureDef();
 		fd1.filter.groupIndex = -1;
 		for(int i = 0; i < 2; i++){
+			bd.type = BodyType.DYNAMIC;
 			//up leg
 			bd.position.set(p_Pelvis.x, p_Pelvis.y - leg_upper/2f);
 			shape.setAsBox(leg_width/2f, leg_upper/2f);
@@ -143,6 +144,9 @@ public class StickTest extends TestbedTest {
 			joint[i * 3 + 1] = (RevoluteJoint) getWorld().createJoint(rjd);
 			con[i * 3 + 1] = new PIDController(body[i * 3 + 2], joint[i * 3 + 1]);
 			//foot
+			if (i == 1){
+				bd.type = BodyType.STATIC;
+			}
 			bd.position.set(p_Pelvis.x, p_Pelvis.y - leg_upper - leg_bottom);
 			shape.setAsBox(foot_length/2f, foot_width/2f);
 			body[i * 3 + 3] = getWorld().createBody(bd);
@@ -152,7 +156,7 @@ public class StickTest extends TestbedTest {
 			rjd.initialize(body[i * 3 + 2], body[i * 3 + 3], new Vec2(p_Pelvis.x, p_Pelvis.y - leg_upper - leg_bottom));
 			rjd.lowerAngle = -0.5f * MathUtils.PI;
 			rjd.upperAngle = 0.1f * MathUtils.PI;
-			rjd.enableLimit = true;
+			rjd.enableLimit = false;
 			rjd.collideConnected = false;
 			joint[i * 3 + 2] = (RevoluteJoint) getWorld().createJoint(rjd);
 			con[i * 3 + 2] = new PIDController(body[i * 3 + 3], joint[i * 3 + 2], 0.3f, 0.001f);
@@ -253,7 +257,7 @@ public class StickTest extends TestbedTest {
 		}
 		
 		if(kick != 0) {
-			con[0].moveTo(MathUtils.PI);
+			con[0].moveTo(targetAngle);
 			con[1].moveTo(MathUtils.PI);
 			con[2].moveTo(MathUtils.PI);
 			con[3].moveTo(MathUtils.PI);
@@ -303,7 +307,7 @@ public class StickTest extends TestbedTest {
 				}
 				break;
 			case 'g':
-				getModel().getKeys()['k'] = false;
+				getModel().getKeys()['g'] = false;
 				if (gSwitch){
 					getWorld().setGravity(new Vec2(0f,0f));
 					gSwitch = false;
