@@ -54,7 +54,7 @@ public class StickTest extends TestbedTest {
 	PIDController con[] = new PIDController[6];
 	int kick = 0;
 	float time = 0;
-	float targetAngle = MathUtils.PI * 5/6;
+	float targetAngle = MathUtils.PI * 7/6;
 	float timeStep = 2f;
 	float phase = 0;
 	float L = 2.0f, W = 0.5f , H = 0.1f;
@@ -123,8 +123,14 @@ public class StickTest extends TestbedTest {
 			fd1.density = 0.5f;
 			body[i * 3 + 1].createFixture(fd1);
 			rjd.initialize(upBody, body[i * 3 + 1],  p_Pelvis);
-			rjd.lowerAngle = -0.5f * MathUtils.PI;
-			rjd.upperAngle = 0.5f * MathUtils.PI;
+			if(i == 0){
+				rjd.lowerAngle = 0;
+				rjd.upperAngle = 0;
+			}else{
+				rjd.lowerAngle = -0.5f * MathUtils.PI;
+				rjd.upperAngle = 0.5f * MathUtils.PI;
+			}
+			
 			rjd.enableLimit = true;
 			rjd.collideConnected = false;
 			joint[i * 3] = (RevoluteJoint) getWorld().createJoint(rjd);
@@ -137,7 +143,7 @@ public class StickTest extends TestbedTest {
 			fd1.density = 0.5f;
 			body[i * 3 + 2].createFixture(fd1);
 			rjd.initialize(body[i * 3 + 1], body[i * 3 + 2], new Vec2(p_Pelvis.x, p_Pelvis.y - leg_upper));
-			rjd.lowerAngle = -0.5f * MathUtils.PI;
+			rjd.lowerAngle = 0;//-0.5f * MathUtils.PI;
 			rjd.upperAngle = 0;
 			rjd.enableLimit = true;
 			rjd.collideConnected = false;
@@ -154,9 +160,9 @@ public class StickTest extends TestbedTest {
 			fd1.density = 0.5f;
 			body[i * 3 + 3].createFixture(fd1);
 			rjd.initialize(body[i * 3 + 2], body[i * 3 + 3], new Vec2(p_Pelvis.x, p_Pelvis.y - leg_upper - leg_bottom));
-			rjd.lowerAngle = -0.5f * MathUtils.PI;
-			rjd.upperAngle = 0.1f * MathUtils.PI;
-			rjd.enableLimit = false;
+			rjd.lowerAngle = 0;//-0.5f * MathUtils.PI;
+			rjd.upperAngle = 0;//0.1f * MathUtils.PI;
+			rjd.enableLimit = true;
 			rjd.collideConnected = false;
 			joint[i * 3 + 2] = (RevoluteJoint) getWorld().createJoint(rjd);
 			con[i * 3 + 2] = new PIDController(body[i * 3 + 3], joint[i * 3 + 2], 0.3f, 0.001f);
@@ -247,20 +253,21 @@ public class StickTest extends TestbedTest {
 		//phase = time / timeStep;
 		//dAngle = phase * targetAngle;
 		
-		if(MathUtils.abs( con[0].currentAngle - targetAngle) < 0.1f && phase <= 0){
+		if(MathUtils.abs( con[3].currentAngle - targetAngle) < 0.1f && phase <= 0){
 			flag = 1;
 			phase = 0.5f;
 			targetAngle = 2 * MathUtils.PI -targetAngle;
+			System.out.println(targetAngle);
 		}
 		if(phase > 0){
 			phase -= 1/60f;
 		}
 		
 		if(kick != 0) {
-			con[0].moveTo(targetAngle);
+			con[0].moveTo(MathUtils.PI);
 			con[1].moveTo(MathUtils.PI);
 			con[2].moveTo(MathUtils.PI);
-			con[3].moveTo(MathUtils.PI);
+			con[3].moveTo(targetAngle);
 			con[4].moveTo(MathUtils.PI);
 			con[5].moveTo(MathUtils.PI);
 		}
@@ -322,7 +329,7 @@ public class StickTest extends TestbedTest {
 	public void reset() {
 		super.reset();
 		kick = 0;
-		targetAngle = MathUtils.PI/2;
+		targetAngle = MathUtils.PI * 7/6;
 	}
 	
 	/**
