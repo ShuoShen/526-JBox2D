@@ -163,11 +163,12 @@ public class StickTest extends TestbedTest {
 	public class PIDController{
 		float prevDiffAngle = 0f;
 		Body body; 
-		float targetAngle, currentAngle;
+		public float targetAngle, currentAngle;
 		RevoluteJoint myJoint;
 		float Kp = 0;
 		float Kd = 0;
 		float Ki = 0;
+		public float torque; 
 		public PIDController(Body body, RevoluteJoint myJoint, float Kp, float Kd){
 			this.body = body;
 			this.myJoint = myJoint;
@@ -188,11 +189,11 @@ public class StickTest extends TestbedTest {
 			float angMomentum, P, I, D, diffAngle, derivDiffAngle, dt = 1/60f;
 			float integDiffAngle = 0.0f;
 			
-			currentAngle = myJoint.getJointAngle() + MathUtils.PI;
+			currentAngle = myJoint.getJointAngle();
 			diffAngle =  targetAngle - currentAngle;
 			integDiffAngle = integDiffAngle + diffAngle * dt;
-			derivDiffAngle = (diffAngle - prevDiffAngle) / dt;
-
+			derivDiffAngle = myJoint.getJointSpeed();
+			
 			P = Kp * diffAngle;
 			I = Ki * integDiffAngle;
 			D = Kd * derivDiffAngle;
@@ -217,10 +218,10 @@ public class StickTest extends TestbedTest {
 			//Vec2 r = body.getWorldCenter().sub(jointPos);
 			//System.out.println(rootJoint.m_bodyA.getAngle() * 180 / 3.14 + " " + rootJoint.m_localAnchor1.y);
 			//float G = Vec2.cross(r, getWorld().getGravity().mul((-1) * body.getMass())) ;
-			angMomentum = P + I + D;
+			torque = P -  D;
 			
-			body.applyTorque(angMomentum);
-			bodyB.applyTorque(-angMomentum);
+			body.applyTorque(-torque);
+			bodyB.applyTorque(torque);
 			
 			
 			

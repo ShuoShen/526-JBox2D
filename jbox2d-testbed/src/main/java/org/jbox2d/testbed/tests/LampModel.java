@@ -82,24 +82,25 @@ public class LampModel extends TestbedTest {
 			bodyDef.position.set(0.0f, 1.0f);
 
 			PolygonShape shape = new PolygonShape();
-			shape.setAsBox(1.0f, 0.08f);
+			shape.setAsBox(1.0f, 0.08f);		// 2m  *  0.16m 
 			
 			FixtureDef fixture = new FixtureDef();
 			fixture.shape = shape;
-			fixture.density = 100.0f;
+			fixture.density = 1.5f;
 			fixture.friction = 0.5f; 
 			fixture.restitution = 0.3f;
 			
-			Body link1 = getWorld().createBody(bodyDef);
+			 link1 = getWorld().createBody(bodyDef);
+			
 			link1.createFixture(fixture);
 			
-			shape.setAsBox(0.7f, 0.08f);
-			fixture.density = 400.0f;
+			shape.setAsBox(0.7f, 0.08f);		// 1.4m * 0.16m
+			fixture.density = 2.0f;
 			fixture.shape = shape;
-			Body link2 = getWorld().createBody(bodyDef);
+			 link2 = getWorld().createBody(bodyDef);
 			link2.createFixture(fixture);
 			
-			fixture.density = 900.f;
+			fixture.density = 2.5f;
 			Body link3 = getWorld().createBody(bodyDef);
 			link3.createFixture(fixture);
 			
@@ -113,15 +114,15 @@ public class LampModel extends TestbedTest {
 			jointP1.localAnchorB = new Vec2(0.65f, 0f);
 			jointP1.enableLimit = true;
 			jointP1.upperAngle = (float)Math.PI / 180 * 130;
-			jointP1.lowerAngle = (float)Math.PI / 180 * 110;
+			jointP1.lowerAngle = (float)Math.PI / 180 * 100;
 			jointP1.maxMotorTorque = 10.0f;
 			jointP1.motorSpeed = 0.0f; 
 			jointP1.enableMotor = true;
 //			jointP1.referenceAngle = (float)-Math.PI / 9;
-			getWorld().createJoint(jointP1);
+		 joint1 = (RevoluteJoint) getWorld().createJoint(jointP1);
 ////						
-			
-//			// P1
+//			
+//			// P2
 			RevoluteJointDef jointP2 = new RevoluteJointDef();
 			jointP2.bodyA = link2;
 			jointP2.bodyB = link3;
@@ -129,19 +130,67 @@ public class LampModel extends TestbedTest {
 			jointP2.localAnchorB = new Vec2(0.65f, 0f);
 			jointP2.enableLimit = true;
 			jointP2.upperAngle = -(float)Math.PI / 180 * 30;
-			jointP2.lowerAngle = -(float)Math.PI / 180 * 120;
+			jointP2.lowerAngle = -(float)Math.PI / 180 * 120;    // -120 ~ -30 degrees
 			jointP2.maxMotorTorque = 10.0f;
 			jointP2.motorSpeed = 0.0f; 
 			jointP2.enableMotor = true;
-//			jointP1.referenceAngle = (float)-Math.PI / 9;
-			getWorld().createJoint(jointP2);
-			
+			joint2 = (RevoluteJoint) getWorld().createJoint(jointP2);
+//			
+		 
+		 
+		 	StickTest st = new StickTest();
+		 	controller1 =  st.new PIDController(link1, joint1, 80f, 2f );
+		 	controller2 =  st.new PIDController(link2, joint2, 40f, 1f );
 		}
+		
+
 	}
-	
+	StickTest.PIDController controller1, controller2;
 	float gravity = 0.0f;
 	static float GRAVITY = 10.0f;
+	RevoluteJoint joint1, joint2;
 	
+	int jumpState = 2;
+	
+	Body link1, link2;
+ 
+	
+	@Override
+	public synchronized void step(TestbedSettings settings) {
+		super.step(settings);
+		addTextLine(String.format("joint angle is %.2f degrees.\n ", joint1.getJointAngle() * 180 / (Math.PI)));
+		addTextLine(String.format("kick is %d", jumpState));
+		addTextLine(String.format("mass of link 1 %f", link1.getMass()));
+		addTextLine(String.format("mass of link 2 %fkg", link2.getMass()));
+		addTextLine(String.format("target angle is %.2f degrees", Math.toDegrees(controller1.targetAngle)));
+		
+		addTextLine(String.format("current angle is %.2f degrees", Math.toDegrees(controller1.currentAngle)));
+		addTextLine(String.format("torque is %.2f N", controller1.torque));
+		addTextLine(String.format("degree velocity is %.2f degrees/s", Math.toDegrees(joint1.getJointSpeed())));
+		
+		addTextLine(String.format("target angle of joint2 is %.2f degrees", Math.toDegrees(controller2.targetAngle)));
+		
+		addTextLine(String.format("current angle of joint 2 is %.2f degrees", Math.toDegrees(controller2.currentAngle)));
+		addTextLine(String.format("torque of joint2 is %.2f Nm", controller2.torque));
+		addTextLine(String.format("degree velocity of joint 2 is %.2f degrees/s", Math.toDegrees(joint2.getJointSpeed())));
+		
+		
+		if (jumpState == 0)
+		{
+			controller1.moveTo((float)Math.PI / 180 * 130);
+			controller2.moveTo((float)Math.toRadians(-120));
+		}
+		else if (jumpState == 1)
+		{
+			controller1.moveTo((float)Math.PI / 180 * 100);
+			controller2.moveTo((float)Math.toRadians(-30));
+		}
+		else
+		{
+			controller1.moveTo((float)Math.PI / 180 * 100 );   
+			controller2.moveTo((float)Math.toRadians(-120));
+		}
+	}
 	@Override
 	public void keyPressed(char key, int argKeyCode) {
 		switch (key) {
@@ -149,6 +198,12 @@ public class LampModel extends TestbedTest {
 				gravity = GRAVITY - gravity;
 				getWorld().setGravity(new Vec2(0, -gravity));
 				System.out.println("gravity is " + gravity);
+				break;
+				
+			case 'j' :
+				getModel().getKeys()['j'] = false;
+				jumpState++;
+				jumpState %= 3;
 				break;
 		}
 	}
