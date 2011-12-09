@@ -64,6 +64,10 @@ public class StickTest extends TestbedTest {
 	boolean gSwitch = true;
 	int flag = 1;
 	float ball_r = 0.1f;
+	final float  TimeStep = 3f;
+	Interpolation ipl[] = new Interpolation[4];
+	long timeStart = 0;
+	State st[] = new State[4];
 	/**
 	 * @see org.jbox2d.testbed.framework.TestbedTest#initTest(boolean)
 	 */
@@ -103,6 +107,13 @@ public class StickTest extends TestbedTest {
 
 			Body body = getWorld().createBody(bd2);
 			body.createFixture(shape2, 1.0f);
+			
+			
+			float angle[] = {0,0,0,0,0,0};
+			
+			st[0] = new State(angle);
+			
+			timeStart = System.nanoTime();
 		}
 	}
 	
@@ -114,7 +125,6 @@ public class StickTest extends TestbedTest {
 		FixtureDef fd1 = new FixtureDef();
 		fd1.filter.groupIndex = -1;
 		for(int i = 0; i < 2; i++){
-			bd.type = BodyType.DYNAMIC;
 			//up leg
 			bd.position.set(p_Pelvis.x, p_Pelvis.y - leg_upper/2f);
 			shape.setAsBox(leg_width/2f, leg_upper/2f);
@@ -123,14 +133,8 @@ public class StickTest extends TestbedTest {
 			fd1.density = 0.5f;
 			body[i * 3 + 1].createFixture(fd1);
 			rjd.initialize(upBody, body[i * 3 + 1],  p_Pelvis);
-			if(i == 0){
-				rjd.lowerAngle = 0;
-				rjd.upperAngle = 0;
-			}else{
-				rjd.lowerAngle = -0.5f * MathUtils.PI;
-				rjd.upperAngle = 0.5f * MathUtils.PI;
-			}
-			
+			rjd.lowerAngle = -0.5f * MathUtils.PI;
+			rjd.upperAngle = 0.5f * MathUtils.PI;
 			rjd.enableLimit = true;
 			rjd.collideConnected = false;
 			joint[i * 3] = (RevoluteJoint) getWorld().createJoint(rjd);
@@ -143,16 +147,13 @@ public class StickTest extends TestbedTest {
 			fd1.density = 0.5f;
 			body[i * 3 + 2].createFixture(fd1);
 			rjd.initialize(body[i * 3 + 1], body[i * 3 + 2], new Vec2(p_Pelvis.x, p_Pelvis.y - leg_upper));
-			rjd.lowerAngle = 0;//-0.5f * MathUtils.PI;
+			rjd.lowerAngle = -0.5f * MathUtils.PI;
 			rjd.upperAngle = 0;
 			rjd.enableLimit = true;
 			rjd.collideConnected = false;
 			joint[i * 3 + 1] = (RevoluteJoint) getWorld().createJoint(rjd);
 			con[i * 3 + 1] = new PIDController(body[i * 3 + 2], joint[i * 3 + 1]);
 			//foot
-			if (i == 1){
-				bd.type = BodyType.STATIC;
-			}
 			bd.position.set(p_Pelvis.x, p_Pelvis.y - leg_upper - leg_bottom);
 			shape.setAsBox(foot_length/2f, foot_width/2f);
 			body[i * 3 + 3] = getWorld().createBody(bd);
@@ -160,8 +161,8 @@ public class StickTest extends TestbedTest {
 			fd1.density = 0.5f;
 			body[i * 3 + 3].createFixture(fd1);
 			rjd.initialize(body[i * 3 + 2], body[i * 3 + 3], new Vec2(p_Pelvis.x, p_Pelvis.y - leg_upper - leg_bottom));
-			rjd.lowerAngle = 0;//-0.5f * MathUtils.PI;
-			rjd.upperAngle = 0;//0.1f * MathUtils.PI;
+			rjd.lowerAngle = -0.5f * MathUtils.PI;
+			rjd.upperAngle = 0.1f * MathUtils.PI;
 			rjd.enableLimit = true;
 			rjd.collideConnected = false;
 			joint[i * 3 + 2] = (RevoluteJoint) getWorld().createJoint(rjd);
@@ -198,7 +199,7 @@ public class StickTest extends TestbedTest {
 			float angMomentum, P, I, D, diffAngle, derivDiffAngle, dt = 1/60f;
 			float integDiffAngle = 0.0f;
 			
-			currentAngle = myJoint.getJointAngle() + MathUtils.PI;
+			currentAngle = myJoint.getJointAngle();
 			diffAngle =  targetAngle - currentAngle;
 			integDiffAngle = integDiffAngle + diffAngle * dt;
 			derivDiffAngle = (diffAngle - prevDiffAngle) / dt;
@@ -233,9 +234,59 @@ public class StickTest extends TestbedTest {
 			bodyB.applyTorque(-angMomentum);
 			
 			
-			
 			this.prevDiffAngle = diffAngle;
 			//System.out.println(prevDiffAngle);
+		}
+	}
+	
+	/*
+	 * linear interpolation
+	 */
+	public class Interpolation{
+		float start, end;
+		float startTime, timeStep;
+		int state = 0;
+		Interpolation(float start, float end, float timeStep){
+			this.start = start;
+			this.end = end;
+			this.timeStep = timeStep;
+		}
+		public void setStartTime(float startTime){
+			if (state == 0){
+				this.startTime = startTime;
+				state = 1;
+			} 
+		}
+		
+		public float getCurrentFrame(float currentTime) {
+			
+			System.out.println((currentTime - startTime));
+			if ((currentTime - startTime) <= timeStep){
+				return (currentTime - startTime) / timeStep * (end - start) + start;
+			} else if ((currentTime - startTime) > timeStep){
+				state = 2;
+				return end;
+			}
+			
+			return end;
+		}
+	}
+	
+	public class State{
+		public float jointAngle[] = new float[6];
+		State (float angle[]){
+			for(int i = 0; i < 6; i++){
+				jointAngle[i] = angle[i];
+			}
+		}
+	}
+	
+	public void stateMachine(){
+		float targetA = body[1].getAngle();
+		if(kick != 0) {
+			for(int i = 0; i < 6; i++){
+				con[i].moveTo(st[0].jointAngle[i]);
+			}
 		}
 	}
 	
@@ -247,7 +298,10 @@ public class StickTest extends TestbedTest {
 	public void step(TestbedSettings settings) {
 		super.step(settings);
 		addTextLine("Click 'k' to enable/disable PID controller, click 'g' to enable/disable gravity" );
-		//addTextLine("Keys: (l) limits, (m) motor, (a) left, (d) right");
+		addTextLine("Angle of Upbody:" + body[0].getAngle() * 180/ MathUtils.PI );
+		addTextLine("Angle of Stance leg:" + body[1].getAngle() * 180/ MathUtils.PI);
+		addTextLine("Angle of Joint0:" + joint[0].getJointAngle() * 180/ MathUtils.PI );
+		addTextLine("Current Time:" + (System.nanoTime() - timeStart)/1000000000.0f);
 		
 		float dAngle = 0;
 		//phase = time / timeStep;
@@ -263,14 +317,7 @@ public class StickTest extends TestbedTest {
 			phase -= 1/60f;
 		}
 		
-		if(kick != 0) {
-			con[0].moveTo(MathUtils.PI);
-			con[1].moveTo(MathUtils.PI);
-			con[2].moveTo(MathUtils.PI);
-			con[3].moveTo(targetAngle);
-			con[4].moveTo(MathUtils.PI);
-			con[5].moveTo(MathUtils.PI);
-		}
+		stateMachine();
 			//System.out.println(body2.m_angularVelocity);	
 		time += 1/60f;
 		if(time > timeStep){
