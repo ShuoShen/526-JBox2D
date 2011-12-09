@@ -87,20 +87,20 @@ public class LampModel extends TestbedTest {
 			FixtureDef fixture = new FixtureDef();
 			fixture.shape = shape;
 			fixture.density = 1.5f;
-			fixture.friction = 0.5f; 
-			fixture.restitution = 0.3f;
+			fixture.friction = 0.8f; 
+			fixture.restitution = 0.2f;
 			
 			 link1 = getWorld().createBody(bodyDef);
 			
 			link1.createFixture(fixture);
 			
 			shape.setAsBox(0.7f, 0.08f);		// 1.4m * 0.16m
-			fixture.density = 2.0f;
+			fixture.density = 1.5f;
 			fixture.shape = shape;
 			 link2 = getWorld().createBody(bodyDef);
 			link2.createFixture(fixture);
 			
-			fixture.density = 2.5f;
+			fixture.density = 3.0f;
 			Body link3 = getWorld().createBody(bodyDef);
 			link3.createFixture(fixture);
 			
