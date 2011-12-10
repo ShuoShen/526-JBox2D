@@ -111,7 +111,7 @@ public class StickTest extends TestbedTest {
 			
 			
 			float angle[][] = {	
-								{0, 0,0,MathUtils.PI/6,-MathUtils.PI/3,0},
+								{0, 0,0,MathUtils.PI/6,0,0},
 								{0,0,0,0,0,0},
 								{0,0,0,0,0,0},
 								{0,0,0,0,0,0}};
@@ -195,7 +195,7 @@ public class StickTest extends TestbedTest {
 			this.body = body;
 			this.myJoint = myJoint;
 			this.currentAngle = myJoint.getJointAngle();
-			this.Kp = 0.3f;
+			this.Kp = 0.5f;
 			this.Kd = 0.001f;
 		}
 		public void moveTo(float targetAngle){
@@ -207,7 +207,7 @@ public class StickTest extends TestbedTest {
 			currentAngle = myJoint.getJointAngle();
 			diffAngle =  targetAngle - currentAngle;
 			integDiffAngle = integDiffAngle + diffAngle * dt;
-			derivDiffAngle = (diffAngle - prevDiffAngle) / dt;
+			derivDiffAngle = -myJoint.getJointSpeed();
 
 			P = Kp * diffAngle;
 			I = Ki * integDiffAngle;
