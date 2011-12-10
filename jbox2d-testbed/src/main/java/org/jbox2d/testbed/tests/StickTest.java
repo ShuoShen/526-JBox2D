@@ -33,11 +33,14 @@ import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.BodyType;
+import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.FixtureDef;
+import org.jbox2d.dynamics.contacts.Contact;
 import org.jbox2d.dynamics.joints.RevoluteJoint;
 import org.jbox2d.dynamics.joints.RevoluteJointDef;
 import org.jbox2d.testbed.framework.TestbedSettings;
 import org.jbox2d.testbed.framework.TestbedTest;
+import org.jbox2d.testbed.tests.SensorTest.BoolWrapper;
 
 /**
  * @author Daniel Murphy
@@ -55,20 +58,27 @@ public class StickTest extends TestbedTest {
 	int kick = 0;
 	float time = 0;
 	float targetAngle = MathUtils.PI * 7/6;
-	float timeStep = 2f;
+	float timeStep = 0.5f;
 	float phase = 0;
 	float L = 2.0f, W = 0.5f , H = 0.1f;
 	float leg_upper = 0.5f , leg_bottom = 0.5f, leg_width = 0.1f;
 	float body_length = 0.4f, body_width = 0.2f;
 	float foot_length = 0.2f, foot_width = 0.1f;
-	boolean gSwitch = true;
-	int flag = 1;
+	boolean gSwitch = false;
+	int flag = 0;
 	float ball_r = 0.1f;
-	final float  TimeStep = 1f;
+	final float  TimeStep = 0.3f;
 	Interpolation ipl[] = new Interpolation[4];
 	long timeStart = 0;
 	long kickStart = 0;
 	State st[] = new State[4];
+	StateMachine sm = new StateMachine();
+	
+	final short CATEGORY_BODY = 0x0001;  // 0000000000000001 in binary
+	final short CATEGORY_BALL = 0x0002; // 0000000000000010 in binary
+	final short CATEGORY_SCENERY = 0x0004; // 0000000000000100 in binary
+	
+	
 	/**
 	 * @see org.jbox2d.testbed.framework.TestbedTest#initTest(boolean)
 	 */
@@ -110,14 +120,20 @@ public class StickTest extends TestbedTest {
 			body.createFixture(shape2, 1.0f);
 			
 			
+//			float angle[][] = {	
+//								{MathUtils.PI/4, -MathUtils.PI/4,0,0,0,0},
+//								{0,0,0,0,0,0},
+//								{0, 0,0,MathUtils.PI/4, -MathUtils.PI/4,0},
+//								{0,0,0,0,0,0}};
 			float angle[][] = {	
-								{0, 0,0,MathUtils.PI/6,0,0},
-								{0,0,0,0,0,0},
-								{0,0,0,0,0,0},
-								{0,0,0,0,0,0}};
+					{MathUtils.PI/6, -MathUtils.PI/3,0,0,0,0},
+					{-MathUtils.PI/6, 0,0,0,0,0},
+					{0,0,0,MathUtils.PI/6, -MathUtils.PI/3,0},
+					{0,0,0,-MathUtils.PI/6, 0,0}};
 			for(int i =0; i < 4;i++){
 				st[i] = new State(angle[i]);
 			}
+			getWorld().setGravity(new Vec2(0f,0f));
 			timeStart = System.nanoTime();
 		}
 	}
@@ -143,7 +159,8 @@ public class StickTest extends TestbedTest {
 			rjd.enableLimit = true;
 			rjd.collideConnected = false;
 			joint[i * 3] = (RevoluteJoint) getWorld().createJoint(rjd);
-			con[i * 3] = new PIDController(body[i * 3 + 1], joint[i * 3]);
+			con[i * 3] = new PIDController(body[i * 3 + 1], joint[i * 3], 0.125f, 0.025f);
+			
 			//bottom leg
 			bd.position.set(p_Pelvis.x, p_Pelvis.y - leg_upper - leg_bottom/2f);
 			shape.setAsBox(leg_width/2f, leg_bottom/2f);
@@ -157,7 +174,8 @@ public class StickTest extends TestbedTest {
 			rjd.enableLimit = true;
 			rjd.collideConnected = false;
 			joint[i * 3 + 1] = (RevoluteJoint) getWorld().createJoint(rjd);
-			con[i * 3 + 1] = new PIDController(body[i * 3 + 2], joint[i * 3 + 1]);
+			con[i * 3 + 1] = new PIDController(body[i * 3 + 2], joint[i * 3 + 1], 0.08f, 0.025f);
+			
 			//foot
 			bd.position.set(p_Pelvis.x, p_Pelvis.y - leg_upper - leg_bottom);
 			shape.setAsBox(foot_length/2f, foot_width/2f);
@@ -171,7 +189,8 @@ public class StickTest extends TestbedTest {
 			rjd.enableLimit = true;
 			rjd.collideConnected = false;
 			joint[i * 3 + 2] = (RevoluteJoint) getWorld().createJoint(rjd);
-			con[i * 3 + 2] = new PIDController(body[i * 3 + 3], joint[i * 3 + 2], 0.3f, 0.001f);
+			con[i * 3 + 2] = new PIDController(body[i * 3 + 3], joint[i * 3 + 2], 0.01f, 0.002f);
+			
 		}
 		
 	}
@@ -195,8 +214,8 @@ public class StickTest extends TestbedTest {
 			this.body = body;
 			this.myJoint = myJoint;
 			this.currentAngle = myJoint.getJointAngle();
-			this.Kp = 0.5f;
-			this.Kd = 0.001f;
+			this.Kp = 0.125f;
+			this.Kd = 0.025f;
 		}
 		public void moveTo(float targetAngle){
 			
@@ -277,11 +296,103 @@ public class StickTest extends TestbedTest {
 		}
 	}
 	
+
+	// Implement contact listener.
+	public void beginContact(Contact contact) {
+		Fixture fixtureA = contact.getFixtureA();
+		Fixture fixtureB = contact.getFixtureB();
+		System.out.println(fixtureA.toString());
+		/*
+		if (fixtureA == m_sensor) {
+			Object userData = fixtureB.getBody().getUserData();
+			if (userData != null) {
+				((BoolWrapper)userData).tf = true;
+			}
+		}
+		
+		if (fixtureB == m_sensor) {
+			Object userData = fixtureA.getBody().getUserData();
+			if (userData != null) {
+				((BoolWrapper)userData).tf = true;
+			}
+		}*/
+	}
+	
+	// Implement contact listener.
+	public void endContact(Contact contact) {
+		Fixture fixtureA = contact.getFixtureA();
+		Fixture fixtureB = contact.getFixtureB();
+		
+		/*if (fixtureA == m_sensor) {
+			Object userData = fixtureB.getBody().getUserData();
+			if (userData != null) {
+				((BoolWrapper)userData).tf = false;
+			}
+		}
+		
+		if (fixtureB == m_sensor) {
+			Object userData = fixtureA.getBody().getUserData();
+			if (userData != null) {
+				((BoolWrapper)userData).tf = false;
+			}
+		}*/
+	}
+	
 	public class State{
 		public float jointAngle[] = new float[6];
 		State (float angle[]){
 			for(int i = 0; i < 6; i++){
 				jointAngle[i] = angle[i];
+			}
+		}
+	}
+	
+	public class StateMachine{
+		int currentState;
+		StateMachine(){
+			currentState = 0;
+		}
+		public boolean checkState(){
+			for(int i = 0; i < 1; i++){
+				if( MathUtils.abs(st[currentState].jointAngle[i*3] - con[i*3].currentAngle) > 0.01f){
+					return false;
+				}
+				if( MathUtils.abs(st[currentState].jointAngle[i*3+1] - con[i*3+1].currentAngle) > 0.01f){
+					return false;
+				}
+				if( MathUtils.abs(st[currentState].jointAngle[i*3+1] - con[i*3+1].currentAngle) > 0.01f){
+					return false;
+				}
+			}
+			
+			return true;
+		}
+		
+		public void stateMachine(){
+			
+			if(kick != 0) {
+				float currentTime = ((System.nanoTime() - kickStart)/1000000000f);
+				if(checkState()){
+					//currentState = (currentState + 1) %4;
+					//System.out.println(currentState);
+				}
+				
+				if (currentState == 0 && currentTime > TimeStep){
+					currentState = 1;
+					currentTime = System.nanoTime();
+				}
+				
+				if (currentState == 1){
+					
+				}
+				
+				for(int i = 0; i < 2; i++){
+					con[i*3].moveTo(st[currentState].jointAngle[i*3]);
+					con[i*3+1].moveTo(st[currentState].jointAngle[i*3+1]);
+					con[i*3+2].moveTo(st[currentState].jointAngle[i*3+2]);
+				}
+				//con[2].moveTo(-body[2].getAngle());
+				//con[5].moveTo(-body[5].getAngle());
 			}
 		}
 	}
@@ -302,9 +413,13 @@ public class StickTest extends TestbedTest {
 			} else {
 				kickStart = System.nanoTime();
 			}
-			for(int i = 0; i < 6; i++){
-				con[i].moveTo(st[k].jointAngle[i]);
+			for(int i = 0; i < 2; i++){
+				con[i*3].moveTo(st[k].jointAngle[i*3]);
+				con[i*3+1].moveTo(st[k].jointAngle[i*3+1]);
+				con[i*3+2].moveTo(st[k].jointAngle[i*3+2]);
 			}
+			//con[2].moveTo(-body[2].getAngle());
+			//con[5].moveTo(-body[5].getAngle());
 		}
 	}
 	
@@ -320,22 +435,8 @@ public class StickTest extends TestbedTest {
 		addTextLine("Angle of Stance leg:" + body[1].getAngle() * 180/ MathUtils.PI);
 		addTextLine("Angle of Joint0:" + joint[0].getJointAngle() * 180/ MathUtils.PI );
 		addTextLine("Current Time:" + (System.nanoTime() - timeStart)/1000000000.0f);
-		
-		float dAngle = 0;
-		//phase = time / timeStep;
-		//dAngle = phase * targetAngle;
-		
-		if(MathUtils.abs( con[3].currentAngle - targetAngle) < 0.1f && phase <= 0){
-			flag = 1;
-			phase = 0.5f;
-			targetAngle = 2 * MathUtils.PI -targetAngle;
-			System.out.println(targetAngle);
-		}
-		if(phase > 0){
-			phase -= 1/60f;
-		}
-		
-		stateMachine();
+	
+		sm.stateMachine();
 			//System.out.println(body2.m_angularVelocity);	
 		time += 1/60f;
 		if(time > timeStep){
@@ -385,7 +486,7 @@ public class StickTest extends TestbedTest {
 					getWorld().setGravity(new Vec2(0f,0f));
 					gSwitch = false;
 				} else {
-					getWorld().setGravity(new Vec2(0f, -10f));
+					getWorld().setGravity(new Vec2(0f, -1f));
 					gSwitch = true;
 				}
 				break;
