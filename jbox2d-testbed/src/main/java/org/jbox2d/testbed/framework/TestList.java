@@ -27,9 +27,6 @@
 package org.jbox2d.testbed.framework;
 
 import org.jbox2d.testbed.tests.ApplyForce;
-import org.jbox2d.testbed.tests.CheetahModel;
-import org.jbox2d.testbed.tests.LampModel;
-import org.jbox2d.testbed.tests.ObjectFallingTest;
 import org.jbox2d.testbed.tests.BlobTest4;
 import org.jbox2d.testbed.tests.BodyTypes;
 import org.jbox2d.testbed.tests.Breakable;
@@ -51,8 +48,6 @@ import org.jbox2d.testbed.tests.Gears;
 import org.jbox2d.testbed.tests.LineJointTest;
 import org.jbox2d.testbed.tests.LiquidTest;
 import org.jbox2d.testbed.tests.OneSidedTest;
-import org.jbox2d.testbed.tests.PlayAround;
-import org.jbox2d.testbed.tests.OscilatingSpringTest;
 import org.jbox2d.testbed.tests.PolyShapes;
 import org.jbox2d.testbed.tests.PrismaticTest;
 import org.jbox2d.testbed.tests.Pulleys;
@@ -68,7 +63,13 @@ import org.jbox2d.testbed.tests.VaryingFrictionTest;
 import org.jbox2d.testbed.tests.VaryingRestitution;
 import org.jbox2d.testbed.tests.VerticalStack;
 import org.jbox2d.testbed.tests.Web;
-import org.jbox2d.testbed.tests.StickTest;
+
+import cs526.jbox2dTests.CheetahModel;
+import cs526.jbox2dTests.LampModel;
+import cs526.jbox2dTests.ObjectFallingTest;
+import cs526.jbox2dTests.OscilatingSpringTest;
+import cs526.jbox2dTests.PlayAround;
+import cs526.jbox2dTests.StickTest;
 
 /**
  * @author Daniel Murphy

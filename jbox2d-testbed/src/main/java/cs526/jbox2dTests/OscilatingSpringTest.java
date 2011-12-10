@@ -24,7 +24,7 @@
 /**
  * Created at 7:50:04 AM Jan 20, 2011
  */
-package org.jbox2d.testbed.tests;
+package cs526.jbox2dTests;
 
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Mat22;

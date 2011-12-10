@@ -24,7 +24,7 @@
 /**
  * Created at 7:59:38 PM Jan 12, 2011
  */
-package org.jbox2d.testbed.tests;
+package cs526.jbox2dTests;
 
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;

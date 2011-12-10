@@ -24,7 +24,7 @@
 /**
  * Created at 7:50:04 AM Jan 20, 2011
  */
-package org.jbox2d.testbed.tests;
+package cs526.jbox2dTests;
 
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;
@@ -41,6 +41,8 @@ import org.jbox2d.dynamics.joints.RevoluteJoint;
 import org.jbox2d.dynamics.joints.RevoluteJointDef;
 import org.jbox2d.testbed.framework.TestbedSettings;
 import org.jbox2d.testbed.framework.TestbedTest;
+
+import cs526.jbox2dTests.StickTest.PIDController;
 
 /**
  * @author Daniel Murphy
