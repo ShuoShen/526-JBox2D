@@ -64,9 +64,10 @@ public class StickTest extends TestbedTest {
 	boolean gSwitch = true;
 	int flag = 1;
 	float ball_r = 0.1f;
-	final float  TimeStep = 3f;
+	final float  TimeStep = 1f;
 	Interpolation ipl[] = new Interpolation[4];
 	long timeStart = 0;
+	long kickStart = 0;
 	State st[] = new State[4];
 	/**
 	 * @see org.jbox2d.testbed.framework.TestbedTest#initTest(boolean)
@@ -109,10 +110,14 @@ public class StickTest extends TestbedTest {
 			body.createFixture(shape2, 1.0f);
 			
 			
-			float angle[] = {0,0,0,0,0,0};
-			
-			st[0] = new State(angle);
-			
+			float angle[][] = {	
+								{0, 0,0,MathUtils.PI/6,-MathUtils.PI/3,0},
+								{0,0,0,0,0,0},
+								{0,0,0,0,0,0},
+								{0,0,0,0,0,0}};
+			for(int i =0; i < 4;i++){
+				st[i] = new State(angle[i]);
+			}
 			timeStart = System.nanoTime();
 		}
 	}
@@ -282,10 +287,23 @@ public class StickTest extends TestbedTest {
 	}
 	
 	public void stateMachine(){
-		float targetA = body[1].getAngle();
+		
 		if(kick != 0) {
+			int k = 0;
+			float currentTime = ((System.nanoTime() - kickStart)/1000000000f);
+			if (currentTime < TimeStep){
+				k = 0;
+			} else if (currentTime < TimeStep * 2){
+				k = 1;
+			} else if (currentTime < TimeStep * 3){
+				k = 2;
+			} else if (currentTime < TimeStep * 4){
+				k = 3;
+			} else {
+				kickStart = System.nanoTime();
+			}
 			for(int i = 0; i < 6; i++){
-				con[i].moveTo(st[0].jointAngle[i]);
+				con[i].moveTo(st[k].jointAngle[i]);
 			}
 		}
 	}
@@ -356,6 +374,7 @@ public class StickTest extends TestbedTest {
 				getModel().getKeys()['k'] = false;
 				if(kick == 0){
 					kick = 1;
+					kickStart = System.nanoTime();
 				} else {
 					kick = 0;
 				}
