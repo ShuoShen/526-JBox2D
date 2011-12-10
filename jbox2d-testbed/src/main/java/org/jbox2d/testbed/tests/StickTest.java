@@ -67,7 +67,7 @@ public class StickTest extends TestbedTest {
 	boolean gSwitch = false;
 	int flag = 0;
 	float ball_r = 0.1f;
-	final float  TimeStep = 0.3f;
+	final float  TimeStep = 1f;
 	Interpolation ipl[] = new Interpolation[4];
 	long timeStart = 0;
 	long kickStart = 0;
@@ -78,7 +78,16 @@ public class StickTest extends TestbedTest {
 	final short CATEGORY_BALL = 0x0002; // 0000000000000010 in binary
 	final short CATEGORY_SCENERY = 0x0004; // 0000000000000100 in binary
 	
+	final short MASK_BODY = CATEGORY_BALL | CATEGORY_SCENERY; // or ~CATEGORY_PLAYER
+	final short MASK_BALL = CATEGORY_BODY | CATEGORY_SCENERY; // or ~CATEGORY_MONSTER
+	final short MASK_SCENERY = -1;
 	
+	Fixture LEFT_FOOT;
+	Fixture RIGHT_FOOT;
+	Fixture GROUND;
+	
+	boolean leftTouch = false;
+	boolean rightTouch = false;
 	/**
 	 * @see org.jbox2d.testbed.framework.TestbedTest#initTest(boolean)
 	 */
@@ -88,10 +97,15 @@ public class StickTest extends TestbedTest {
 		{
 			BodyDef bd = new BodyDef();
 			ground = getWorld().createBody(bd);
+			FixtureDef fd1 = new FixtureDef();
 			
 			PolygonShape shape = new PolygonShape();
 			shape.setAsEdge(new Vec2(-40.0f, 0.0f), new Vec2(40.0f, 0.0f));
-			ground.createFixture(shape, 0.0f);
+			fd1.filter.categoryBits = CATEGORY_SCENERY;
+			fd1.filter.maskBits = MASK_SCENERY;
+			fd1.shape = shape;
+			fd1.density = 0f;
+			GROUND = ground.createFixture(fd1);
 		}
 		
 		{
@@ -102,7 +116,8 @@ public class StickTest extends TestbedTest {
 			bd.position.set(0.0f, H + body_length/2 + leg_upper + leg_bottom);
 			body[0] = getWorld().createBody(bd);
 			FixtureDef fd1 = new FixtureDef();
-			fd1.filter.groupIndex = -1;
+			fd1.filter.categoryBits = CATEGORY_BODY;
+			fd1.filter.maskBits = MASK_BODY;
 			fd1.shape = shape;
 			fd1.density = 0.5f;
 			body[0].createFixture(fd1);
@@ -111,20 +126,25 @@ public class StickTest extends TestbedTest {
 			
 			CircleShape shape2 = new CircleShape();
 			shape2.m_radius = ball_r;
-
+			FixtureDef fd2 = new FixtureDef();
+			fd2.filter.categoryBits = CATEGORY_BALL;
+			fd2.filter.maskBits = MASK_BALL;
+			fd2.shape = shape2;
+			fd2.density = 0.5f;
 			BodyDef bd2 = new BodyDef();
 			bd2.type = BodyType.DYNAMIC;
 			bd2.position.set(0.5f, 0.5f);
 
 			Body body = getWorld().createBody(bd2);
-			body.createFixture(shape2, 1.0f);
+			body.createFixture(fd2);
 			
-			
-//			float angle[][] = {	
-//								{MathUtils.PI/4, -MathUtils.PI/4,0,0,0,0},
-//								{0,0,0,0,0,0},
-//								{0, 0,0,MathUtils.PI/4, -MathUtils.PI/4,0},
-//								{0,0,0,0,0,0}};
+			/*
+			float angle[][] = {	
+								{MathUtils.PI/4, -MathUtils.PI/4,0,0,0,0},
+								{0,0,0,0,0,0},
+								{0, 0,0,MathUtils.PI/4, -MathUtils.PI/4,0},
+								{0,0,0,0,0,0}};
+								*/
 			float angle[][] = {	
 					{MathUtils.PI/6, -MathUtils.PI/3,0,0,0,0},
 					{-MathUtils.PI/6, 0,0,0,0,0},
@@ -144,7 +164,8 @@ public class StickTest extends TestbedTest {
 		PolygonShape shape = new PolygonShape();
 		RevoluteJointDef rjd = new RevoluteJointDef();
 		FixtureDef fd1 = new FixtureDef();
-		fd1.filter.groupIndex = -1;
+		fd1.filter.categoryBits = CATEGORY_BODY;
+		fd1.filter.maskBits = MASK_BODY;
 		for(int i = 0; i < 2; i++){
 			//up leg
 			bd.position.set(p_Pelvis.x, p_Pelvis.y - leg_upper/2f);
@@ -182,7 +203,12 @@ public class StickTest extends TestbedTest {
 			body[i * 3 + 3] = getWorld().createBody(bd);
 			fd1.shape = shape;
 			fd1.density = 0.5f;
-			body[i * 3 + 3].createFixture(fd1);
+			if(i == 0){
+				LEFT_FOOT = body[i * 3 + 3].createFixture(fd1);
+			} else {
+				RIGHT_FOOT = body[i * 3 + 3].createFixture(fd1);
+			}
+			
 			rjd.initialize(body[i * 3 + 2], body[i * 3 + 3], new Vec2(p_Pelvis.x, p_Pelvis.y - leg_upper - leg_bottom));
 			rjd.lowerAngle = -0.5f * MathUtils.PI;
 			rjd.upperAngle = 0.1f * MathUtils.PI;
@@ -190,6 +216,9 @@ public class StickTest extends TestbedTest {
 			rjd.collideConnected = false;
 			joint[i * 3 + 2] = (RevoluteJoint) getWorld().createJoint(rjd);
 			con[i * 3 + 2] = new PIDController(body[i * 3 + 3], joint[i * 3 + 2], 0.01f, 0.002f);
+			
+			
+			
 			
 		}
 		
@@ -301,7 +330,15 @@ public class StickTest extends TestbedTest {
 	public void beginContact(Contact contact) {
 		Fixture fixtureA = contact.getFixtureA();
 		Fixture fixtureB = contact.getFixtureB();
-		System.out.println(fixtureA.toString());
+		
+		if (fixtureB == RIGHT_FOOT) {
+			System.out.println("RIGHT foot B");
+			//sm.updateState(1);
+		} else if (fixtureB == LEFT_FOOT){
+			System.out.println("Left foot B");
+			//sm.updateState(0);
+		}
+		
 		/*
 		if (fixtureA == m_sensor) {
 			Object userData = fixtureB.getBody().getUserData();
@@ -365,7 +402,24 @@ public class StickTest extends TestbedTest {
 				}
 			}
 			
+			currentState = (currentState + 1)<=3?(currentState + 1):(currentState + 1 - 3);
 			return true;
+		}
+		public void setState(int state){
+			currentState = state;
+		}
+		/*
+		 * flag = 0, left foot; flag = 1, right foot;
+		 */
+		public void updateState(int flag){
+			if(flag == 0 && currentState == 1){
+				currentState = 2;
+			}
+			
+			if(flag == 1 && currentState == 3){
+				currentState = 0;
+				kickStart = System.nanoTime();
+			}
 		}
 		
 		public void stateMachine(){
@@ -376,14 +430,29 @@ public class StickTest extends TestbedTest {
 					//currentState = (currentState + 1) %4;
 					//System.out.println(currentState);
 				}
-				
 				if (currentState == 0 && currentTime > TimeStep){
+					
 					currentState = 1;
-					currentTime = System.nanoTime();
+					kickStart = System.nanoTime();
+					currentTime = 0;
 				}
 				
-				if (currentState == 1){
-					
+				if (currentState == 1 && currentTime > TimeStep){
+					currentState = 2;
+					kickStart = System.nanoTime();
+					currentTime = 0;
+				}
+				
+				if (currentState == 2 && currentTime > TimeStep){
+					currentState = 3;
+					kickStart = System.nanoTime();
+					currentTime = 0;
+				}
+				
+				if (currentState == 3 && currentTime > TimeStep){
+					currentState = 0;
+					kickStart = System.nanoTime();
+					currentTime = 0;
 				}
 				
 				for(int i = 0; i < 2; i++){
@@ -478,6 +547,7 @@ public class StickTest extends TestbedTest {
 					kickStart = System.nanoTime();
 				} else {
 					kick = 0;
+					sm.setState(0);
 				}
 				break;
 			case 'g':
@@ -497,6 +567,7 @@ public class StickTest extends TestbedTest {
 		super.reset();
 		kick = 0;
 		targetAngle = MathUtils.PI * 7/6;
+		sm.setState(0);
 	}
 	
 	/**
