@@ -42,6 +42,7 @@ import org.jbox2d.dynamics.joints.RevoluteJointDef;
 import org.jbox2d.testbed.framework.TestbedSettings;
 import org.jbox2d.testbed.framework.TestbedTest;
 
+import cs526.animation.PdController;
 import cs526.jbox2dTests.StickTest.PIDController;
 
 /**
@@ -141,13 +142,13 @@ public class LampModel extends TestbedTest {
 		 
 		 
 		 	StickTest st = new StickTest();
-		 	controller1 =  st.new PIDController(link1, joint1, 80f, 2f );
-		 	controller2 =  st.new PIDController(link2, joint2, 40f, 1f );
+		 	controller1 =  new PdController(link1, joint1, 80f, 2f );
+		 	controller2 =  new PdController(link2, joint2, 40f, 1f );
 		}
 		
 
 	}
-	StickTest.PIDController controller1, controller2;
+	PdController controller1, controller2;
 	float gravity = 0.0f;
 	static float GRAVITY = 10.0f;
 	RevoluteJoint joint1, joint2;
