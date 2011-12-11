@@ -52,10 +52,14 @@ public class CharacterInfo {
 	public CharacterInfo(Object obj)
 	{
 		Scanner scanner = null;
+		String fileName = obj.getClass().getSimpleName();
 		try {
-			scanner = new Scanner(new File(obj.getClass().getSimpleName()));
+			scanner = new Scanner(new File(fileName));
 		} catch (FileNotFoundException e) {
+			
 			e.printStackTrace();
+			
+			System.out.println("Please create a file named " + fileName);
 		}
 		
 		while (scanner.hasNext())

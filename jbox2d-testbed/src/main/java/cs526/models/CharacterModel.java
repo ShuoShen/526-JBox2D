@@ -29,6 +29,7 @@ import cs526.utilities.LinkPosition;
  */
 public class CharacterModel {
 	
+	private static final float MOTOR_TORQUE = 10.0f;
 	private HashMap<String, Body> links;
 	HashMap<String, RevoluteJoint> joints;
 	HashMap<String, PdController> controllers;
@@ -117,7 +118,7 @@ public class CharacterModel {
 			jointDef.lowerAngle = (float) Math.toRadians(jointInfo.lowerAngleDegree);
 			
 			jointDef.enableLimit = true;
-			jointDef.maxMotorTorque = 10.0f;
+			jointDef.maxMotorTorque = MOTOR_TORQUE;
 			jointDef.enableMotor = true;
 			
 			joints.put(jointName, (RevoluteJoint) world.createJoint(jointDef));

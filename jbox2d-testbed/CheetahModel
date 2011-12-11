@@ -1,0 +1,16 @@
+Links
+# see the paper windup toys
+# link_name width 	height   mass
+  l1		0.20	0.05	 0.30
+  l2		0.25	0.05	 0.35
+  l3		0.25	0.05	 0.15
+  l4		0.25	0.05	 0.10
+  l5		0.25	0.05	 0.35
+  l6		0.25	0.05	 0.15
+  l7		0.25	0.05	 0.10
+00
+
+Joints
+# joint_name	link_a	link_a_position	link_b	link_b_position	upper_angle	lower_angle
+  p1			l1		Right			l2		Left			0			-45
+00

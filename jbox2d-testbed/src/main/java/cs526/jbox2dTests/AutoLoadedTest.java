@@ -110,5 +110,11 @@ public abstract class AutoLoadedTest extends TestbedTest {
 		}
 	}
 	
+	@Override
+	public String getTestName() {
+		return this.getClass().getSimpleName();
+	}
+	
+	
 
 }
