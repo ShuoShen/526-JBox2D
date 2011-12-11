@@ -85,6 +85,11 @@ public class CharacterInfo {
 				
 	}
 	
+	public int nStates()
+	{
+		return states.size();
+	}
+	
 	public Set<String> getLinkNames()
 	{
 		return linkInfoMap.keySet();
