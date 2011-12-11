@@ -37,12 +37,12 @@ public class CharacterModel {
 	private CharacterInfo characterInfo;
 	private int currentStateId = -1;
 	
-	public CharacterModel(World world, CharacterInfo info)
+	public CharacterModel(World world, CharacterInfo info, float motorTorque)
 	{
 		this.world = world;
 		this.characterInfo = info;
 		links = createLinks(this.world, characterInfo);
-		joints = createJoints(this.world, characterInfo, links);
+		joints = createJoints(this.world, characterInfo, links, motorTorque);
 		controllers = createControllers(this.world, characterInfo, joints);
 	}
 	
@@ -98,7 +98,8 @@ public class CharacterModel {
 		return controllers;
 	}
 	
-	private HashMap<String, RevoluteJoint> createJoints(World world, CharacterInfo modelInfo, HashMap<String, Body> links)
+	private HashMap<String, RevoluteJoint> createJoints(World world, CharacterInfo modelInfo, 
+				HashMap<String, Body> links, float motorTorque)
 	{
 		HashMap<String, RevoluteJoint> joints = new HashMap<String, RevoluteJoint>();
 		
@@ -118,7 +119,7 @@ public class CharacterModel {
 			jointDef.lowerAngle = (float) Math.toRadians(jointInfo.lowerAngleDegree);
 			
 			jointDef.enableLimit = true;
-			jointDef.maxMotorTorque = MOTOR_TORQUE;
+			jointDef.maxMotorTorque = motorTorque;
 			jointDef.enableMotor = true;
 			
 			joints.put(jointName, (RevoluteJoint) world.createJoint(jointDef));

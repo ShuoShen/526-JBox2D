@@ -1,16 +1,44 @@
 Links
 # see the paper windup toys
 # link_name width 	height   mass
-  l1		0.20	0.05	 0.30
-  l2		0.25	0.05	 0.35
-  l3		0.25	0.05	 0.15
-  l4		0.25	0.05	 0.10
-  l5		0.25	0.05	 0.35
-  l6		0.25	0.05	 0.15
-  l7		0.25	0.05	 0.10
+  l1		0.20	0.05	 1.30
+  l2		0.25	0.05	 1.35
+  l3		0.25	0.05	 1.15
+  l4		0.25	0.05	 1.10
+  l5		0.25	0.05	 1.35
+  l6		0.25	0.05	 1.15
+  l7		0.25	0.05	 1.10
+  h1 		0.18	0.05	 0.01
+#  h2		0.08	0.05	 0.01
+#  head		0.18	0.10	 1.51
 00
 
 Joints
 # joint_name	link_a	link_a_position	link_b	link_b_position	upper_angle	lower_angle
+  j0			l2		Middle			h1		Left			30			20
+#  j1			h1		Right			h2		Left			90			90
+#  j2			h2		Right			head	Left			-90			-90
   p1			l1		Right			l2		Left			0			-45
+  p2 			l1		Left			l5		Right			45			0
+  a1 			l2		Right			l3		Left			45			-90
+  a2			l3		Right			l4		Left			90			0
+  a3			l6		Right			l5		Left			0			-90
+  a4			l7		Right			l6		Left			-30			-120
 00
+
+Controllers
+# joint_name 	ks		kd
+	a1			18		0.035
+	a2			18		0.035
+	a3			18		0.035
+	a4			18		0.035
+00	
+	
+States
+# number_joints		joint_name1	desired_angle1 joint_name2 desired_angle2 ...  
+	4				a1			-45				a2			30		a3	-40	 a4	-120
+	4				a1			-60				a2			30		a3	0	 a4	-30
+	4				a1			-90				a2			90		a3	0	 a4	-30
+#	4				a1			-90				a2			90		a3	-10	 a4	-45 			
+#	4				a1			-90				a2			0		a3	-80	 a4	-80
+00	

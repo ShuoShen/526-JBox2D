@@ -53,6 +53,7 @@ public abstract class AutoLoadedTest extends TestbedTest {
 	}
 	float gravity = 0.0f;
 	static float GRAVITY = 10.0f;
+	float frictionMotorTorque = 10.0f;
 	CharacterInfo modelInfo;
 	CharacterModel model;
 	/**
@@ -81,7 +82,7 @@ public abstract class AutoLoadedTest extends TestbedTest {
 
 	private void createCharater() {
 		modelInfo = new CharacterInfo(this);
-		model = new CharacterModel(getWorld(), modelInfo);
+		model = new CharacterModel(getWorld(), modelInfo, frictionMotorTorque);
 	}
 	
 
