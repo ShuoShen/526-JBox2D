@@ -1,4 +1,4 @@
-package cs526.animation;
+package cs526.controls;
 
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.joints.RevoluteJoint;
@@ -19,19 +19,19 @@ public class PdController{
 	Body body; 
 	public float targetAngle, currentAngle;
 	RevoluteJoint myJoint;
-	float Kp = 0;
+	float Ks = 0;
 	float Kd = 0;
 	float Ki = 0;
 	public float torque; 
-	public PdController(Body body, RevoluteJoint myJoint, float Kp, float Kd){
-		this.body = body;
+	public PdController(RevoluteJoint myJoint, float Ks, float Kd){
+		this.body = myJoint.m_bodyA;
 		this.myJoint = myJoint;
 		this.currentAngle = myJoint.getJointAngle();
-		this.Kp = Kp;
+		this.Ks = Ks;
 		this.Kd = Kd;
 	}
-	public PdController(Body body, RevoluteJoint myJoint){
-		this(body, myJoint, 0.3f, 0.001f);
+	public PdController(RevoluteJoint myJoint){
+		this(myJoint, 0.3f, 0.001f);
 	}
 	public void moveTo(float targetAngle){
 		
@@ -44,14 +44,10 @@ public class PdController{
 		integDiffAngle = integDiffAngle + diffAngle * dt;
 		derivDiffAngle = myJoint.getJointSpeed();
 		
-		P = Kp * diffAngle;
+		P = Ks * diffAngle;
 		I = Ki * integDiffAngle;
 		D = Kd * derivDiffAngle;
 		
-
-		//System.out.println(diffAngle);
-		
-		//gravity compensation
 		
 		//System.out.println(diffAngle);
 		Body bodyB;
@@ -60,7 +56,6 @@ public class PdController{
 		} else {
 			bodyB = myJoint.m_bodyA;
 		}
-		//Vec2 jointPos = new Vec2(0f, 0f);
 		//jointPos.x = MathUtils.sin(rootJoint.m_bodyA.getAngle()) * MathUtils.abs(rootJoint.m_localAnchor1.y) + rootJoint.m_bodyA.getWorldCenter().x;
 		//jointPos.y = MathUtils.cos(rootJoint.m_bodyA.getAngle()) * MathUtils.abs(rootJoint.m_localAnchor1.y) + rootJoint.m_bodyA.getWorldCenter().y;
 		
