@@ -88,6 +88,8 @@ public class StickTest extends TestbedTest {
 	
 	boolean leftTouch = false;
 	boolean rightTouch = false;
+	
+	PIDController virtualC[] = new PIDController[3];
 	/**
 	 * @see org.jbox2d.testbed.framework.TestbedTest#initTest(boolean)
 	 */
@@ -105,6 +107,7 @@ public class StickTest extends TestbedTest {
 			fd1.filter.maskBits = MASK_SCENERY;
 			fd1.shape = shape;
 			fd1.density = 0f;
+			fd1.friction = 1f;
 			GROUND = ground.createFixture(fd1);
 		}
 		
@@ -131,6 +134,7 @@ public class StickTest extends TestbedTest {
 			fd2.filter.maskBits = MASK_BALL;
 			fd2.shape = shape2;
 			fd2.density = 0.5f;
+			fd2.friction = 1f;
 			BodyDef bd2 = new BodyDef();
 			bd2.type = BodyType.DYNAMIC;
 			bd2.position.set(0.5f, 0.5f);
@@ -138,22 +142,25 @@ public class StickTest extends TestbedTest {
 			Body body = getWorld().createBody(bd2);
 			body.createFixture(fd2);
 			
+			
+			float angle[][] = {	
+								{MathUtils.PI/4, -MathUtils.PI/4,0,0,-MathUtils.PI/4,0},
+								{0,0,0,0,0,0},
+								{0,-MathUtils.PI/4,0,MathUtils.PI/4, -MathUtils.PI/4,0},
+								{0,0,0,0,0,0}};
+								
 			/*
 			float angle[][] = {	
-								{MathUtils.PI/4, -MathUtils.PI/4,0,0,0,0},
-								{0,0,0,0,0,0},
-								{0, 0,0,MathUtils.PI/4, -MathUtils.PI/4,0},
-								{0,0,0,0,0,0}};
-								*/
-			float angle[][] = {	
-					{MathUtils.PI/6, -MathUtils.PI/3,0,0,0,0},
-					{-MathUtils.PI/6, 0,0,0,0,0},
-					{0,0,0,MathUtils.PI/6, -MathUtils.PI/3,0},
-					{0,0,0,-MathUtils.PI/6, 0,0}};
+					{0,0,0,0,0,0},
+					{0,0,0,0,0,0},
+					{0,0,0,0,0,0},
+					{0,0,0,0,0,0}};
+					*/
 			for(int i =0; i < 4;i++){
 				st[i] = new State(angle[i]);
 			}
 			getWorld().setGravity(new Vec2(0f,0f));
+			virtualC[0] = new PIDController(body[0]);
 			timeStart = System.nanoTime();
 		}
 	}
@@ -232,6 +239,7 @@ public class StickTest extends TestbedTest {
 		float Kp = 0;
 		float Kd = 0;
 		float Ki = 0;
+		float torque;
 		public PIDController(Body body, RevoluteJoint myJoint, float Kp, float Kd){
 			this.body = body;
 			this.myJoint = myJoint;
@@ -239,6 +247,14 @@ public class StickTest extends TestbedTest {
 			this.Kp = Kp;
 			this.Kd = Kd;
 		}
+		
+		public PIDController(Body body){
+			this.body = body;
+			this.currentAngle = body.getAngle();
+			this.Kp = 0.125f;
+			this.Kd = 0.025f;
+		}
+		
 		public PIDController(Body body, RevoluteJoint myJoint){
 			this.body = body;
 			this.myJoint = myJoint;
@@ -246,6 +262,25 @@ public class StickTest extends TestbedTest {
 			this.Kp = 0.125f;
 			this.Kd = 0.025f;
 		}
+		
+		public void vMoveTo(float targetAngle){
+			this.targetAngle = targetAngle;
+			float P, D, diffAngle, derivDiffAngle;
+			
+			currentAngle = myJoint.getJointAngle();
+			diffAngle =  targetAngle - currentAngle;
+			derivDiffAngle = -myJoint.getJointSpeed();
+
+			P = Kp * diffAngle;
+			D = Kd * derivDiffAngle;
+			
+			torque = P + D;
+			
+			body.applyTorque(torque);
+			//bodyB.applyTorque(-angMomentum);
+
+		}
+		
 		public void moveTo(float targetAngle){
 			
 			this.targetAngle = targetAngle;
@@ -284,7 +319,7 @@ public class StickTest extends TestbedTest {
 			angMomentum = P + I + D;
 			
 			body.applyTorque(angMomentum);
-			bodyB.applyTorque(-angMomentum);
+			//bodyB.applyTorque(-angMomentum);
 			
 			
 			this.prevDiffAngle = diffAngle;
@@ -465,7 +500,7 @@ public class StickTest extends TestbedTest {
 			}
 		}
 	}
-	
+	/*
 	public void stateMachine(){
 		
 		if(kick != 0) {
@@ -491,7 +526,7 @@ public class StickTest extends TestbedTest {
 			//con[5].moveTo(-body[5].getAngle());
 		}
 	}
-	
+	*/
 	
 	/**
 	 * @see org.jbox2d.testbed.framework.TestbedTest#step(org.jbox2d.testbed.framework.TestbedSettings)
