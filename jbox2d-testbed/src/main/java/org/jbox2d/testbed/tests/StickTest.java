@@ -125,7 +125,8 @@ public class StickTest extends TestbedTest {
 			fd1.density = 0.5f;
 			body[0].createFixture(fd1);
 			createLegs(new Vec2(0, body[0].getWorldCenter().y - body_length/2f), body[0]);
-			
+
+			virtualC[0] = new PIDController(body[0]);
 			
 			CircleShape shape2 = new CircleShape();
 			shape2.m_radius = ball_r;
@@ -160,7 +161,6 @@ public class StickTest extends TestbedTest {
 				st[i] = new State(angle[i]);
 			}
 			getWorld().setGravity(new Vec2(0f,0f));
-			virtualC[0] = new PIDController(body[0]);
 			timeStart = System.nanoTime();
 		}
 	}
@@ -267,9 +267,9 @@ public class StickTest extends TestbedTest {
 			this.targetAngle = targetAngle;
 			float P, D, diffAngle, derivDiffAngle;
 			
-			currentAngle = myJoint.getJointAngle();
+			currentAngle = body.getAngle();
 			diffAngle =  targetAngle - currentAngle;
-			derivDiffAngle = -myJoint.getJointSpeed();
+			derivDiffAngle = -body.getAngularVelocity();
 
 			P = Kp * diffAngle;
 			D = Kd * derivDiffAngle;
@@ -489,7 +489,7 @@ public class StickTest extends TestbedTest {
 					kickStart = System.nanoTime();
 					currentTime = 0;
 				}
-				
+				virtualC[0].vMoveTo(0);
 				for(int i = 0; i < 2; i++){
 					con[i*3].moveTo(st[currentState].jointAngle[i*3]);
 					con[i*3+1].moveTo(st[currentState].jointAngle[i*3+1]);
