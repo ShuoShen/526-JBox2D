@@ -53,7 +53,7 @@ import org.jbox2d.testbed.framework.TestbedTest;
 
 import cs526.controls.PdController;
 import cs526.jbox2dTests.StickTest.PIDController;
-import cs526.models.CharacterModel;
+import cs526.models.CharacterInfo;
 import cs526.utilities.ControllerInfo;
 import cs526.utilities.DesiredState;
 import cs526.utilities.JointInfo;
@@ -61,7 +61,7 @@ import cs526.utilities.LinkPosition;
 import cs526.utilities.LinkInfo;
 
 /**
- * @author Daniel Murphy
+ * @author Shuo Shen
  */
 public class LampModel extends TestbedTest {
 
@@ -114,10 +114,10 @@ public class LampModel extends TestbedTest {
 	}
 //	HashMap<String, LinkInfo> linkInfoMap = new HashMap<String, LinkInfo>();
 
-	CharacterModel model;
+	CharacterInfo model;
 	private void createCharater2() {
 		
-		model = new CharacterModel(this);
+		model = new CharacterInfo(this);
 		
 		HashMap<String, Body> links = new HashMap<String, Body>();
 		BodyDef bodyDef = new BodyDef();
@@ -187,92 +187,11 @@ public class LampModel extends TestbedTest {
 						
 		controller1 = controllers.get("a1");
 		controller2 = controllers.get("a2");
-//		
-//		DesiredState state1 = new DesiredState();
-//		state1.put("a1", 130f);
-//		state1.put("a2", -120f);
-//				
-//		DesiredState state2 = new DesiredState();
-//		state2.put("a1", 100f);
-//		state2.put("a2", -30f);
-//				
-//		DesiredState state3 = new DesiredState();
-//		state3.put("a1", 100f);
-//		state3.put("a2", -120f);
-//		
-//		states.add(state1);
-//		states.add(state2);
-//		states.add(state3);
+
 		
 	}
 	
-	//	private void createCharacter() {
-//		{
-//			// L1
-//			BodyDef bodyDef = new BodyDef();
-//			bodyDef.type = BodyType.DYNAMIC;
-//			bodyDef.position.set(0.0f, 1.0f);
-//
-//			PolygonShape shape = new PolygonShape();
-//			shape.setAsBox(1.0f, 0.08f); // 2m * 0.16m
-//
-//			FixtureDef fixture = new FixtureDef();
-//			fixture.shape = shape;
-//			fixture.density = 1.5f;
-//			fixture.friction = 0.8f;
-//			fixture.restitution = 0.2f;
-//
-//			link1 = getWorld().createBody(bodyDef);
-//
-//			link1.createFixture(fixture);
-//
-//			shape.setAsBox(0.7f, 0.08f); // 1.4m * 0.16m
-//			fixture.density = 1.5f;
-//			fixture.shape = shape;
-//			link2 = getWorld().createBody(bodyDef);
-//			link2.createFixture(fixture);
-//
-//			fixture.density = 3.0f;
-//			Body link3 = getWorld().createBody(bodyDef);
-//			link3.createFixture(fixture);
-//
-//			// // create joints
-//			//
-//			// // P1
-//			RevoluteJointDef jointP1 = new RevoluteJointDef();
-//			jointP1.bodyA = link1;
-//			jointP1.bodyB = link2;
-//			jointP1.localAnchorA = new Vec2(0f, 0f);
-//			jointP1.localAnchorB = new Vec2(0.65f, 0f);
-//			jointP1.enableLimit = true;
-//			jointP1.upperAngle = (float) Math.PI / 180 * 130;
-//			jointP1.lowerAngle = (float) Math.PI / 180 * 100;
-//			jointP1.maxMotorTorque = 10.0f;
-//			jointP1.motorSpeed = 0.0f;
-//			jointP1.enableMotor = true;
-//			// jointP1.referenceAngle = (float)-Math.PI / 9;
-//			joint1 = (RevoluteJoint) getWorld().createJoint(jointP1);
-//			// //
-//			//
-//			// // P2
-//			RevoluteJointDef jointP2 = new RevoluteJointDef();
-//			jointP2.bodyA = link2;
-//			jointP2.bodyB = link3;
-//			jointP2.localAnchorA = new Vec2(-0.65f, 0f);
-//			jointP2.localAnchorB = new Vec2(0.65f, 0f);
-//			jointP2.enableLimit = true;
-//			jointP2.upperAngle = -(float) Math.PI / 180 * 30;
-//			jointP2.lowerAngle = -(float) Math.PI / 180 * 120; // -120 ~ -30
-//																// degrees
-//			jointP2.maxMotorTorque = 10.0f;
-//			jointP2.motorSpeed = 0.0f;
-//			jointP2.enableMotor = true;
-//			joint2 = (RevoluteJoint) getWorld().createJoint(jointP2);
-//			//
-//
-//		}
-//	}
-//
+
 	HashMap<String, PdController> controllers = new HashMap<String, PdController>();
 	PdController controller1, controller2;
 	float gravity = 0.0f;

@@ -1,0 +1,29 @@
+Links
+# link_name width 	height   mass
+  b1        2.0    	0.16     0.5
+  b2 		1.4   	0.16	 0.33
+  b3 		1.4	  	0.16	 0.63
+  b4		0.3		0.3		 0.1
+  b5		0.3		0.3		 0.1
+00
+
+Joints
+# joint_name	link_a	link_a_position	link_b	link_b_position	upper_angle	lower_angle
+  a1			b1		Middle			b2		Left			130			100
+  a2			b2		Right			b3		Left			-30			-120
+  a3			b1		Left			b4		Middle			0			0
+  a4			b1		Right			b5		Middle			0			0
+00
+  		
+Controllers
+# joint_name 	ks		kd
+	a1			80		2
+	a2			40		2
+00
+
+States
+# number_joints		joint_name1	desired_angle1 joint_name2 desired_angle2 ...  
+	2				a1			130				a2			-120  	
+	2				a1			100				a2			-30		
+	2				a1			100				a2			-120	
+00	
