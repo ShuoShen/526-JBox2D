@@ -191,7 +191,7 @@ public class StickTest extends TestbedTest {
 			rjd.enableLimit = true;
 			rjd.collideConnected = false;
 			joint[i * 3] = (RevoluteJoint) getWorld().createJoint(rjd);
-			con[i * 3] = new PIDController(body[i * 3 + 1], joint[i * 3], 0.125f, 0.025f);
+			con[i * 3] = new PIDController(body[i * 3 + 1], joint[i * 3], 0.18f, 0.025f);
 			virtualC[i+1] = new PIDController(body[i * 3 + 1]);
 			
 			//bottom leg
@@ -288,6 +288,7 @@ public class StickTest extends TestbedTest {
 			//bodyB.applyTorque(-angMomentum);
 
 		}
+
 		
 		public void moveTo(float targetAngle){
 			
@@ -418,6 +419,21 @@ public class StickTest extends TestbedTest {
 		}*/
 	}
 	
+	/*
+	 * get the horizontal distance between mass centre and stance foot
+	 */
+	public float getD(Body massCenter, Body stanceFoot){
+		float d = massCenter.getWorldPoint(new Vec2(0, -body_length/2)).x - stanceFoot.getWorldCenter().x;
+		return d;
+	}
+	/*
+	 * get the velocity of mass centre
+	 */
+	public float getV(Body massCenter){
+		float v = massCenter.getLinearVelocityFromLocalPoint(new Vec2(0, -body_length/2)).x;
+		return v;
+	}
+	
 	public class State{
 		public float jointAngle[] = new float[6];
 		State (float angle[]){
@@ -432,6 +448,21 @@ public class StickTest extends TestbedTest {
 		StateMachine(){
 			currentState = 0;
 		}
+		
+		/*
+		 * get the velocity of mass centre
+		 */
+		public float getDistance(){
+			if(currentState == 0 || currentState ==1){
+				return getD(body[0], body[6]);
+			}
+			if(currentState == 2 || currentState ==3){
+				return getD(body[0], body[3]);
+			}
+			
+			return 0;
+		}
+		
 		public boolean checkState(){
 			for(int i = 0; i < 1; i++){
 				if( MathUtils.abs(st[currentState].jointAngle[i*3] - con[i*3].currentAngle) > 0.01f){
@@ -463,6 +494,10 @@ public class StickTest extends TestbedTest {
 				currentState = 0;
 				kickStart = System.nanoTime();
 			}
+		}
+		
+		public float balanceFeedback(float desiredAngle, float d, float v){
+			return desiredAngle + MathUtils.PI/10 * d ;//+ v<0?(-desiredAngle - MathUtils.PI/10 * d):0;
 		}
 		
 		public void stateMachine(){
@@ -503,15 +538,18 @@ public class StickTest extends TestbedTest {
 					con[i*3+1].moveTo(st[currentState].jointAngle[i*3+1]);
 					con[i*3+2].moveTo(st[currentState].jointAngle[i*3+2]);
 				}
+				
+				
+				
 				if(currentState >= 0 && currentState <=1) {
-					virtualC[1].vMoveTo(st[currentState].jointAngle[0]);
+					virtualC[1].vMoveTo(balanceFeedback(st[currentState].jointAngle[0], getDistance(), getV(body[0])));
 					body[4].applyTorque(-virtualC[0].torque - virtualC[1].torque);
 				} else if (currentState >=2 && currentState <= 3) {
-					virtualC[2].vMoveTo(st[currentState].jointAngle[3]);
+					virtualC[2].vMoveTo(balanceFeedback(st[currentState].jointAngle[3], getDistance(), getV(body[0])));
 					body[1].applyTorque(-virtualC[0].torque - virtualC[2].torque);
 				}
 				
-
+				
 				
 				//con[2].moveTo(-body[2].getAngle());
 				//con[5].moveTo(-body[5].getAngle());
@@ -557,7 +595,8 @@ public class StickTest extends TestbedTest {
 		addTextLine("Angle of Stance leg:" + body[1].getAngle() * 180/ MathUtils.PI);
 		addTextLine("Angle of Joint0:" + joint[0].getJointAngle() * 180/ MathUtils.PI );
 		addTextLine("Current Time:" + (System.nanoTime() - timeStart)/1000000000.0f);
-	
+		addTextLine(String.format("%2.2f", getV(body[0])));
+		addTextLine(String.format("%2.2f", sm.getDistance()));
 		sm.stateMachine();
 			//System.out.println(body2.m_angularVelocity);	
 		time += 1/60f;
