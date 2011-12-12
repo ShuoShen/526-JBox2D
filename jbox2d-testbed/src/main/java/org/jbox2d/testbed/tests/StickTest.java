@@ -145,10 +145,10 @@ public class StickTest extends TestbedTest {
 			
 			
 			float angle[][] = {	
-								{MathUtils.PI/4, -MathUtils.PI/4,0,0,-MathUtils.PI/4,0},
-								{0,0,0,0,0,0},
-								{0,-MathUtils.PI/4,0,MathUtils.PI/4, -MathUtils.PI/4,0},
-								{0,0,0,0,0,0}};
+								{MathUtils.PI/6, -MathUtils.PI/3,0,0,0,0},
+								{0,0,0,-MathUtils.PI/6,0,0},
+								{0,0,0,MathUtils.PI/6, -MathUtils.PI/3,0},
+								{-MathUtils.PI/6,0,0,0,0,0}};
 								
 			/*
 			float angle[][] = {	
@@ -176,7 +176,11 @@ public class StickTest extends TestbedTest {
 		for(int i = 0; i < 2; i++){
 			//up leg
 			bd.position.set(p_Pelvis.x, p_Pelvis.y - leg_upper/2f);
-			shape.setAsBox(leg_width/2f, leg_upper/2f);
+			if (i == 0){
+				shape.setAsBox(leg_width/2f, (leg_upper)/2f);
+			} else {
+				shape.setAsBox(leg_width/2f, leg_upper/2f);
+			}
 			body[i * 3 + 1] = getWorld().createBody(bd);
 			fd1.shape = shape;
 			fd1.density = 0.5f;
@@ -188,6 +192,7 @@ public class StickTest extends TestbedTest {
 			rjd.collideConnected = false;
 			joint[i * 3] = (RevoluteJoint) getWorld().createJoint(rjd);
 			con[i * 3] = new PIDController(body[i * 3 + 1], joint[i * 3], 0.125f, 0.025f);
+			virtualC[i+1] = new PIDController(body[i * 3 + 1]);
 			
 			//bottom leg
 			bd.position.set(p_Pelvis.x, p_Pelvis.y - leg_upper - leg_bottom/2f);
@@ -219,7 +224,7 @@ public class StickTest extends TestbedTest {
 			rjd.initialize(body[i * 3 + 2], body[i * 3 + 3], new Vec2(p_Pelvis.x, p_Pelvis.y - leg_upper - leg_bottom));
 			rjd.lowerAngle = -0.5f * MathUtils.PI;
 			rjd.upperAngle = 0.1f * MathUtils.PI;
-			rjd.enableLimit = true;
+			rjd.enableLimit = false;
 			rjd.collideConnected = false;
 			joint[i * 3 + 2] = (RevoluteJoint) getWorld().createJoint(rjd);
 			con[i * 3 + 2] = new PIDController(body[i * 3 + 3], joint[i * 3 + 2], 0.01f, 0.002f);
@@ -230,7 +235,10 @@ public class StickTest extends TestbedTest {
 		}
 		
 	}
-	
+	public float normalize(float in){
+		return in;
+		//return ((in + MathUtils.PI) % MathUtils.PI * 2 + MathUtils.PI * 2) % MathUtils.PI * 2 - MathUtils.PI;
+	}
 	public class PIDController{
 		float prevDiffAngle = 0f;
 		Body body; 
@@ -267,7 +275,7 @@ public class StickTest extends TestbedTest {
 			this.targetAngle = targetAngle;
 			float P, D, diffAngle, derivDiffAngle;
 			
-			currentAngle = body.getAngle();
+			currentAngle = normalize(body.getAngle());
 			diffAngle =  targetAngle - currentAngle;
 			derivDiffAngle = -body.getAngularVelocity();
 
@@ -287,7 +295,7 @@ public class StickTest extends TestbedTest {
 			float angMomentum, P, I, D, diffAngle, derivDiffAngle, dt = 1/60f;
 			float integDiffAngle = 0.0f;
 			
-			currentAngle = myJoint.getJointAngle();
+			currentAngle = normalize(myJoint.getJointAngle());
 			diffAngle =  targetAngle - currentAngle;
 			integDiffAngle = integDiffAngle + diffAngle * dt;
 			derivDiffAngle = -myJoint.getJointSpeed();
@@ -319,7 +327,7 @@ public class StickTest extends TestbedTest {
 			angMomentum = P + I + D;
 			
 			body.applyTorque(angMomentum);
-			//bodyB.applyTorque(-angMomentum);
+			bodyB.applyTorque(-angMomentum);
 			
 			
 			this.prevDiffAngle = diffAngle;
@@ -461,10 +469,10 @@ public class StickTest extends TestbedTest {
 			
 			if(kick != 0) {
 				float currentTime = ((System.nanoTime() - kickStart)/1000000000f);
-				if(checkState()){
+				//if(checkState()){
 					//currentState = (currentState + 1) %4;
 					//System.out.println(currentState);
-				}
+				//}
 				if (currentState == 0 && currentTime > TimeStep){
 					
 					currentState = 1;
@@ -491,10 +499,20 @@ public class StickTest extends TestbedTest {
 				}
 				virtualC[0].vMoveTo(0);
 				for(int i = 0; i < 2; i++){
-					con[i*3].moveTo(st[currentState].jointAngle[i*3]);
+					//con[i*3].moveTo(st[currentState].jointAngle[i*3]);
 					con[i*3+1].moveTo(st[currentState].jointAngle[i*3+1]);
 					con[i*3+2].moveTo(st[currentState].jointAngle[i*3+2]);
 				}
+				if(currentState >= 0 && currentState <=1) {
+					virtualC[1].vMoveTo(st[currentState].jointAngle[0]);
+					body[4].applyTorque(-virtualC[0].torque - virtualC[1].torque);
+				} else if (currentState >=2 && currentState <= 3) {
+					virtualC[2].vMoveTo(st[currentState].jointAngle[3]);
+					body[1].applyTorque(-virtualC[0].torque - virtualC[2].torque);
+				}
+				
+
+				
 				//con[2].moveTo(-body[2].getAngle());
 				//con[5].moveTo(-body[5].getAngle());
 			}
