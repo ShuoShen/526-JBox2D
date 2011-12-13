@@ -12,7 +12,7 @@ import org.jbox2d.dynamics.World;
 import org.jbox2d.dynamics.joints.RevoluteJoint;
 import org.jbox2d.dynamics.joints.RevoluteJointDef;
 
-import cs526.controls.PdController;
+import cs526.controls.JointPdController;
 import cs526.utilities.ControllerInfo;
 import cs526.utilities.DesiredState;
 import cs526.utilities.JointInfo;
@@ -29,14 +29,20 @@ import cs526.utilities.LinkPosition;
  */
 public class CharacterModel {
 	
+	private float startTime; 
+	private float currentTime;
 	private static final float MOTOR_TORQUE = 10.0f;
 	private HashMap<String, Body> links;
 	HashMap<String, RevoluteJoint> joints;
-	HashMap<String, PdController> controllers;
+	HashMap<String, JointPdController> controllers;
 	private World world;
 	private CharacterInfo characterInfo;
 	private int currentStateId = -1;
 	
+	public float getElapsedCurrentTime()
+	{
+		return currentTime - startTime;
+	}
 	public CharacterModel(World world, CharacterInfo info, float motorTorque)
 	{
 		this.world = world;
@@ -56,26 +62,47 @@ public class CharacterModel {
 		return joints.get(jointName);
 	}
 	
-	public PdController getControllerByName(String controllerName)
+	public void activateMotion()
+	{
+		startTime = (float)(System.nanoTime() / 1e9);
+		nextState();
+	}
+	
+	public JointPdController getControllerByName(String controllerName)
 	{
 		return controllers.get(controllerName);
 	}
-	public void nextState()
+	public int nextState()
 	{
 		currentStateId = (currentStateId + 1) % characterInfo.nStates();
+		return currentStateId;
+		
 	}
 	public void driveToDesiredState()
 	{
+		if (getCurrentDesiredState() == null )
+			return;
 		
+		currentTime = (float)(System.nanoTime() / 1e9);
+		if (currentTime  - startTime > getCurrentDesiredState().getStepTime())
+		{
+			nextState();
+			startTime = currentTime;
+		}
 		DesiredState state = getCurrentDesiredState();
 		if (state == null)
 			return;
 		for (String key : state.getJointNames())
 		{
-			PdController controller = getControllerByName(key);
+			JointPdController controller = getControllerByName(key);
 			float desiredAngle = state.getAngleByJointName(key);
 			controller.moveTo(desiredAngle);
 		}
+	}
+	
+	public int getCurrentStateId()
+	{
+		return currentStateId;
 	}
 	
 	public DesiredState getCurrentDesiredState()
@@ -85,14 +112,14 @@ public class CharacterModel {
 		return characterInfo.getState(currentStateId);
 	}
 	
-	private HashMap<String, PdController> createControllers(World world, CharacterInfo modelInfo, HashMap<String, RevoluteJoint> joints)
+	private HashMap<String, JointPdController> createControllers(World world, CharacterInfo modelInfo, HashMap<String, RevoluteJoint> joints)
 	{
-		HashMap<String, PdController> controllers = new HashMap<String, PdController>();
+		HashMap<String, JointPdController> controllers = new HashMap<String, JointPdController>();
 		
 		for (String key : modelInfo.getControllerNames())
 		{
 			ControllerInfo cInfo = modelInfo.getControllerInfoByJointName(key);
-			PdController controller = new PdController(joints.get(key), cInfo.ks, cInfo.kd);
+			JointPdController controller = new JointPdController(joints.get(key), cInfo.ks, cInfo.kd);
 			controllers.put(key, controller);
 		}
 		return controllers;
@@ -145,9 +172,10 @@ public class CharacterModel {
 			fixture.shape = shape;
 			fixture.density = bodyInfo.mass
 					/ (bodyInfo.width * bodyInfo.height);
-			fixture.friction = 0.8f;
-			fixture.restitution = 0.2f;
-
+			fixture.friction = 1.0f;
+			fixture.restitution = 0.0f;
+			fixture.filter.groupIndex = -1; 	// TODO: group index
+			
 			Body link = world.createBody(bodyDef);
 			link.createFixture(fixture);
 			
@@ -160,7 +188,7 @@ public class CharacterModel {
 			float width, float height) {
 		Vec2 vector = null;
 
-		float dist = width / 2 - height / 2;
+		float dist = width / 2 ;//- height / 2;
 		if (jointPosition == LinkPosition.Middle) {
 			vector = new Vec2(0f, 0f);
 		} else if (jointPosition == LinkPosition.Left) {

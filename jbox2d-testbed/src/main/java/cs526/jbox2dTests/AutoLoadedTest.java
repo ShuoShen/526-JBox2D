@@ -52,7 +52,7 @@ public abstract class AutoLoadedTest extends TestbedTest {
 		return true;
 	}
 	float gravity = 0.0f;
-	static float GRAVITY = 10.0f;
+	float DEFAULT_GRAVITY = 10.0f;
 	float frictionMotorTorque = 10.0f;
 	CharacterInfo modelInfo;
 	CharacterModel model;
@@ -85,28 +85,31 @@ public abstract class AutoLoadedTest extends TestbedTest {
 		model = new CharacterModel(getWorld(), modelInfo, frictionMotorTorque);
 	}
 	
-
+		
 	@Override
 	public synchronized void step(TestbedSettings settings) {
 		super.step(settings);
 		addTextLine("Press 'g' to toggle gravity");
 		addTextLine("Press 'n' to initiate move.");
+		addTextLine("Current state is :" + model.getCurrentStateId());
+		addTextLine("elapsed time is :" + model.getElapsedCurrentTime());
 
 		model.driveToDesiredState();
+	
 	}
 	
 	@Override
 	public void keyPressed(char key, int argKeyCode) {
 		switch (key) {
 		case 'g':
-			gravity = GRAVITY - gravity;
+			gravity = DEFAULT_GRAVITY - gravity;
 			getWorld().setGravity(new Vec2(0, -gravity));
 			break;
 
 		case 'n':
 			getModel().getKeys()['n'] = false;
-			model.nextState();
-
+//			model.nextState();
+			model.activateMotion();
 			break;
 		}
 	}

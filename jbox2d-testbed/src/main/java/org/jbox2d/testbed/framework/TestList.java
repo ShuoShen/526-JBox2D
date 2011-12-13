@@ -64,6 +64,7 @@ import org.jbox2d.testbed.tests.VaryingRestitution;
 import org.jbox2d.testbed.tests.VerticalStack;
 import org.jbox2d.testbed.tests.Web;
 
+import cs526.jbox2dTests.BipedWalker;
 import cs526.jbox2dTests.CheetahModel;
 import cs526.jbox2dTests.LampModel;
 import cs526.jbox2dTests.ObjectFallingTest;
@@ -79,6 +80,7 @@ public class TestList {
   public static void populateModel(TestbedModel argModel){
       
 	  argModel.addCategory("526 Project");
+	  argModel.addTest(new BipedWalker());
 	  argModel.addTest(new CheetahModel());
 	  argModel.addTest(new LampModel());
 	  argModel.addTest(new PlayAround());

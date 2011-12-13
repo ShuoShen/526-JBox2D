@@ -22,8 +22,8 @@ Controllers
 00
 
 States
-# number_joints		joint_name1	desired_angle1 joint_name2 desired_angle2 ...  
-	2				a1			130				a2			-120  	
-	2				a1			100				a2			-30		
-	2				a1			100				a2			-120	
+# time_step	number_joints		joint_name1	desired_angle1 joint_name2 desired_angle2 ...  
+	0.3		2				a1			130				a2			-120  	
+	0.3		2				a1			100				a2			-30		
+	0.3		2				a1			100				a2			-120	
 00	

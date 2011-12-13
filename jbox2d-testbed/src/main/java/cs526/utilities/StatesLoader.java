@@ -18,9 +18,10 @@ public class StatesLoader {
 			{
 				break;
 			}
-			int nJoints = Integer.parseInt(start);
+			float stepTime = Float.parseFloat(start);
+			int nJoints = scanner.nextInt();
 			
-			DesiredState state = new DesiredState();
+			DesiredState state = new DesiredState(stepTime);
 			while (nJoints-- > 0)
 			{
 				state.putDesiredAngle(scanner.next(), scanner.nextFloat());
