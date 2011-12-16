@@ -37,25 +37,28 @@ import cs526.models.CharacterInfo;
 import cs526.models.CharacterModel;
 
 /**
- * Simply extend this class and create a input file with the same name as the subclass.
- * The subclass will automatically load character from the input file, and create it
- * in the physics world. <br/>
+ * Simply extend this class and create a input file with the same name as the
+ * subclass. The subclass will automatically load character from the input file,
+ * and create it in the physics world. <br/>
  * 
- *   <br/>
- *   See the sample file LampModel
+ * <br/>
+ * See the sample file LampModel
+ * 
  * @author Shuo Shen
  */
 public abstract class AutoLoadedTest extends TestbedTest {
-	
+
 	@Override
 	public boolean isSaveLoadEnabled() {
 		return true;
 	}
+
 	float gravity = 0.0f;
 	float DEFAULT_GRAVITY = 10.0f;
 	float frictionMotorTorque = 10.0f;
 	CharacterInfo modelInfo;
 	CharacterModel model;
+
 	/**
 	 * @see org.jbox2d.testbed.framework.TestbedTest#initTest(boolean)
 	 */
@@ -84,8 +87,7 @@ public abstract class AutoLoadedTest extends TestbedTest {
 		modelInfo = new CharacterInfo(this);
 		model = new CharacterModel(getWorld(), modelInfo, frictionMotorTorque);
 	}
-	
-		
+
 	@Override
 	public synchronized void step(TestbedSettings settings) {
 		super.step(settings);
@@ -95,9 +97,8 @@ public abstract class AutoLoadedTest extends TestbedTest {
 		addTextLine("elapsed time is :" + model.getElapsedCurrentTime());
 
 		model.driveToDesiredState();
-	
 	}
-	
+
 	@Override
 	public void keyPressed(char key, int argKeyCode) {
 		switch (key) {
@@ -108,17 +109,15 @@ public abstract class AutoLoadedTest extends TestbedTest {
 
 		case 'n':
 			getModel().getKeys()['n'] = false;
-//			model.nextState();
+			// model.nextState();
 			model.activateMotion();
 			break;
 		}
 	}
-	
+
 	@Override
 	public String getTestName() {
 		return this.getClass().getSimpleName();
 	}
-	
-	
 
 }

@@ -6,34 +6,31 @@ import org.jbox2d.collision.Manifold;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.contacts.Contact;
-import org.jbox2d.dynamics.joints.Joint;
 import org.jbox2d.testbed.framework.TestbedSettings;
 
 import cs526.controls.PdController;
 import cs526.controls.VirtualPdController;
 
-public class BipedWalker extends AutoLoadedTest {
+public class Kicker extends AutoLoadedTest {
 
-	@Override
 	public void initTest(boolean argDeserialized) {
 
 		frictionMotorTorque = 0.0f;
-		DEFAULT_GRAVITY = 1.0f;
+		DEFAULT_GRAVITY = 10.0f;
 		// TODO Auto-generated method stub
 		super.initTest(argDeserialized);
 
 		super.setCamera(new Vec2(0f, 0f), 20f);
 
 		virtualControls.put("torso",
-				new VirtualPdController(model.getLinkByName("torso"), 0.125f,
-						0.025f));
+				new VirtualPdController(model.getLinkByName("torso"),300f,
+						30f));
 		virtualControls.put("l_up_leg",
 				new VirtualPdController(model.getLinkByName("l_up_leg"),
-						0.125f, 0.025f));
+						300f, 30f));
 		virtualControls.put("r_up_leg",
 				new VirtualPdController(model.getLinkByName("r_up_leg"),
-						0.125f, 0.025f));
-
+						300f, 30f));
 	}
 
 	HashMap<String, PdController> virtualControls = new HashMap<String, PdController>();
@@ -94,27 +91,27 @@ public class BipedWalker extends AutoLoadedTest {
 
 	@Override
 	public void preSolve(Contact contact, Manifold oldManifold) {
-		// TODO Auto-generated method stub
-		super.preSolve(contact, oldManifold);
-
-		// System.out.println("contact");
-		Body b = contact.m_fixtureB.getBody();
-		Body leftFoot = model.getLinkByName("l_foot");
-		Body rightFoot = model.getLinkByName("r_foot");
-
-		if (b == leftFoot && leftSwing
-				&& leftFoot.getWorldCenter().x > rightFoot.getWorldCenter().x) {
-			leftSwing = false;
-			rightSwing = true;
-			System.out.println("left foot contact");
-		}
-
-		else if (b == rightFoot && rightSwing
-				&& leftFoot.getWorldCenter().x < rightFoot.getWorldCenter().x) {
-			rightSwing = false;
-			leftSwing = true;
-			System.out.println("right foot contact");
-		}
+//		// TODO Auto-generated method stub
+//		super.preSolve(contact, oldManifold);
+//
+//		// System.out.println("contact");
+//		Body b = contact.m_fixtureB.getBody();
+//		Body leftFoot = model.getLinkByName("l_foot");
+//		Body rightFoot = model.getLinkByName("r_foot");
+//
+//		if (b == leftFoot && leftSwing
+//				&& leftFoot.getWorldCenter().x > rightFoot.getWorldCenter().x) {
+//			leftSwing = false;
+//			rightSwing = true;
+//			System.out.println("left foot contact");
+//		}
+//
+//		else if (b == rightFoot && rightSwing
+//				&& leftFoot.getWorldCenter().x < rightFoot.getWorldCenter().x) {
+//			rightSwing = false;
+//			leftSwing = true;
+//			System.out.println("right foot contact");
+//		}
 
 	}
 

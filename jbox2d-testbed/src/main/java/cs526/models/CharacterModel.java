@@ -75,6 +75,7 @@ public class CharacterModel {
 	public int nextState()
 	{
 		currentStateId = (currentStateId + 1) % characterInfo.nStates();
+		startTime = currentTime;
 		return currentStateId;
 		
 	}
@@ -87,7 +88,7 @@ public class CharacterModel {
 		if (currentTime  - startTime > getCurrentDesiredState().getStepTime())
 		{
 			nextState();
-			startTime = currentTime;
+			
 		}
 		DesiredState state = getCurrentDesiredState();
 		if (state == null)
@@ -195,6 +196,10 @@ public class CharacterModel {
 			vector = new Vec2(-dist, 0f);
 		} else if (jointPosition == LinkPosition.Right) {
 			vector = new Vec2(dist, 0f);
+		} else if (jointPosition == LinkPosition.Top) {
+			vector = new Vec2(0f, height/2);
+		} else if (jointPosition == LinkPosition.Bottom) {
+			vector = new Vec2(0f, -height/2);
 		}
 		return vector;
 	}
