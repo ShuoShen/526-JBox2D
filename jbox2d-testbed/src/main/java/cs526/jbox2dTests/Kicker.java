@@ -42,8 +42,8 @@ public class Kicker extends AutoLoadedTest {
 		float virtualTorque = 0.0f;
 		int stateId = model.getCurrentStateId();
 
-		float angle = (float) Math.toRadians(35);
-		float m_angle = (float) Math.toRadians(0);
+		float angle = (float) Math.toRadians(45);
+		float m_angle = (float) Math.toRadians(-40);
 		float zero = (float) Math.toRadians(0);
 
 		

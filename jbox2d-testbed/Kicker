@@ -1,7 +1,7 @@
 Links
 # see the paper windup toys
 # link_name width 	height   mass
-  torso		0.2		0.5		 50
+  torso		0.2		0.3		 50
   l_up_leg	0.1		0.5		 5
   r_up_leg	0.1		0.5		5
   l_bottom_leg	0.1		0.5		4
@@ -22,12 +22,12 @@ Joints
 
 Controllers
 # joint_name 	ks		kd
- l_pelvis		300		30
+  l_pelvis		300		30
   r_pelvis		300		30
-  l_knee		30		3
-  r_knee		30		3
-  l_ankle		30		3
-  r_ankle		30		3
+  l_knee		300		30
+  r_knee		300		30
+  l_ankle		300		30
+  r_ankle		300		30
 00
 
 States

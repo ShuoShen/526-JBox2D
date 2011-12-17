@@ -65,7 +65,13 @@ public class CharacterModel {
 	public void activateMotion()
 	{
 		startTime = (float)(System.nanoTime() / 1e9);
+		activated = true;
 		nextState();
+	}
+	
+	public void deactivateMotion()
+	{
+		activated = false;
 	}
 	
 	public JointPdController getControllerByName(String controllerName)
@@ -76,20 +82,38 @@ public class CharacterModel {
 	{
 		currentStateId = (currentStateId + 1) % characterInfo.nStates();
 		startTime = currentTime;
+		scale = 1.0f;
+		System.out.println("next state");
 		return currentStateId;
-		
 	}
+	
+	private boolean activated = false;
+	
+	public float getStepTime()
+	{
+		if (activated)
+			return getCurrentDesiredState().getStepTime() * scale;
+		return Float.MAX_VALUE;
+	}
+	
+	private float scale = 1.0f;
+	public void scaleStepTime(float scale)
+	{
+		this.scale = scale;
+	}
+	
 	public void driveToDesiredState()
 	{
 		if (getCurrentDesiredState() == null )
 			return;
 		
 		currentTime = (float)(System.nanoTime() / 1e9);
-		if (currentTime  - startTime > getCurrentDesiredState().getStepTime())
+		if (currentTime  - startTime > getStepTime())
 		{
+			System.out.println(getStepTime());
 			nextState();
-			
 		}
+		
 		DesiredState state = getCurrentDesiredState();
 		if (state == null)
 			return;

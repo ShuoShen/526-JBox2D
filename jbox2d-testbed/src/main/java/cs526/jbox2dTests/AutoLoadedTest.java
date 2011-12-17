@@ -92,7 +92,9 @@ public abstract class AutoLoadedTest extends TestbedTest {
 	public synchronized void step(TestbedSettings settings) {
 		super.step(settings);
 		addTextLine("Press 'g' to toggle gravity");
-		addTextLine("Press 'n' to initiate move.");
+		addTextLine("Press 'a' to activate move.");
+		addTextLine("Press 'd' to deactivate move.");
+		addTextLine("Press 'n' to next state.");
 		addTextLine("Current state is :" + model.getCurrentStateId());
 		addTextLine("elapsed time is :" + model.getElapsedCurrentTime());
 
@@ -107,12 +109,24 @@ public abstract class AutoLoadedTest extends TestbedTest {
 			getWorld().setGravity(new Vec2(0, -gravity));
 			break;
 
-		case 'n':
-			getModel().getKeys()['n'] = false;
+		case 'a':
+			getModel().getKeys()['a'] = false;
 			// model.nextState();
 			model.activateMotion();
 			break;
+
+		case 'd':
+			getModel().getKeys()['d'] = false;
+			model.deactivateMotion();
+			break;
+			
+		case 'n':
+			getModel().getKeys()['n'] = false;
+			System.out.println("n");
+			model.nextState();
+			break;
 		}
+		
 	}
 
 	@Override

@@ -35,6 +35,6 @@ States
   1.0		4		l_knee -60 l_ankle 90 r_knee 0 r_ankle 90
   1.0		4		l_knee 0 l_ankle 90	r_knee 0 r_ankle 90
   1.0		4		l_knee 0 l_ankle 90  r_knee -60 r_ankle 90
-  1.0		4	l_knee 0 l_ankle 90  r_knee 0 r_ankle 90 
+  1.0		4		l_knee 0 l_ankle 90  r_knee 0 r_ankle 90 
 00	
 
