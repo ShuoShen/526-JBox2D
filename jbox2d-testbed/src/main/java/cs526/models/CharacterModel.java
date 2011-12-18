@@ -68,6 +68,10 @@ public class CharacterModel {
 		activated = true;
 		nextState();
 	}
+	public boolean isActivated()
+	{
+		return activated;
+	}
 	
 	public void deactivateMotion()
 	{
@@ -99,7 +103,7 @@ public class CharacterModel {
 	private float scale = 1.0f;
 	public void scaleStepTime(float scale)
 	{
-		this.scale = scale;
+		this.scale = Math.abs(scale);
 	}
 	
 	public void driveToDesiredState()

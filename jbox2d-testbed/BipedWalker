@@ -2,7 +2,7 @@ Links
 # see the paper windup toys
 # link_name width 	height   mass
   torso		0.2		0.4		 0.04
-  l_up_leg	0.1		0.5		0.025
+  l_up_leg	0.2		0.5		0.025
   r_up_leg	0.1		0.5		0.025
   l_bottom_leg	0.1		0.5		0.025
   r_bottom_leg	0.1		0.5		0.025
