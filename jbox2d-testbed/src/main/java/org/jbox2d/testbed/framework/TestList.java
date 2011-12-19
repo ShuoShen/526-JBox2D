@@ -81,8 +81,9 @@ public class TestList {
   public static void populateModel(TestbedModel argModel){
       
 	  argModel.addCategory("526 Project");
-	  argModel.addTest(new Kicker());
+	  
 	  argModel.addTest(new BipedWalker());
+	  argModel.addTest(new Kicker());
 	  argModel.addTest(new CheetahModel());
 	  argModel.addTest(new LampModel());
 	  argModel.addTest(new PlayAround());

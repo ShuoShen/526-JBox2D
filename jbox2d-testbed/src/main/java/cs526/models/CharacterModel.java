@@ -29,8 +29,8 @@ import cs526.utilities.LinkPosition;
  */
 public class CharacterModel {
 	
-	private float startTime; 
-	private float currentTime;
+	private int startStep; 
+	private int currentStep;
 	private static final float MOTOR_TORQUE = 10.0f;
 	private HashMap<String, Body> links;
 	HashMap<String, RevoluteJoint> joints;
@@ -38,10 +38,11 @@ public class CharacterModel {
 	private World world;
 	private CharacterInfo characterInfo;
 	private int currentStateId = -1;
+	private HashMap<String, Float> targetAngleCompensates = new HashMap<String, Float>(); 
 	
 	public float getElapsedCurrentTime()
 	{
-		return currentTime - startTime;
+		return currentStep - startStep;
 	}
 	public CharacterModel(World world, CharacterInfo info, float motorTorque)
 	{
@@ -50,6 +51,11 @@ public class CharacterModel {
 		links = createLinks(this.world, characterInfo);
 		joints = createJoints(this.world, characterInfo, links, motorTorque);
 		controllers = createControllers(this.world, characterInfo, joints);
+	}
+	
+	public void setNewTargetAngleCompensate(String jointName, float targetAngle)
+	{
+		targetAngleCompensates.put(jointName, targetAngle);
 	}
 	
 	public Body getLinkByName(String linkName)
@@ -64,7 +70,7 @@ public class CharacterModel {
 	
 	public void activateMotion()
 	{
-		startTime = (float)(System.nanoTime() / 1e9);
+		startStep = 0;
 		activated = true;
 		nextState();
 	}
@@ -85,9 +91,9 @@ public class CharacterModel {
 	public int nextState()
 	{
 		currentStateId = (currentStateId + 1) % characterInfo.nStates();
-		startTime = currentTime;
+		startStep = currentStep;
 		scale = 1.0f;
-		System.out.println("next state");
+
 		return currentStateId;
 	}
 	
@@ -106,15 +112,16 @@ public class CharacterModel {
 		this.scale = Math.abs(scale);
 	}
 	
-	public void driveToDesiredState()
+	public void driveToDesiredState(int hz)
 	{
+		
 		if (getCurrentDesiredState() == null )
 			return;
 		
-		currentTime = (float)(System.nanoTime() / 1e9);
-		if (currentTime  - startTime > getStepTime())
+		currentStep++;
+		if (currentStep  - startStep > getStepTime() * hz)
 		{
-			System.out.println(getStepTime());
+//			System.out.println(getStepTime());
 			nextState();
 		}
 		
@@ -125,6 +132,9 @@ public class CharacterModel {
 		{
 			JointPdController controller = getControllerByName(key);
 			float desiredAngle = state.getAngleByJointName(key);
+			if (targetAngleCompensates.containsKey(key)){
+				desiredAngle += targetAngleCompensates.get(key);
+			}
 			controller.moveTo(desiredAngle);
 		}
 	}

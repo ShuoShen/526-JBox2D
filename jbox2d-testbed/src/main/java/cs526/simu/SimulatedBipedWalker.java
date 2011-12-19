@@ -1,4 +1,4 @@
-package cs526.jbox2dTests;
+package cs526.simu;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -13,6 +13,7 @@ import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.FixtureDef;
+import org.jbox2d.dynamics.World;
 import org.jbox2d.dynamics.contacts.Contact;
 import org.jbox2d.dynamics.joints.Joint;
 import org.jbox2d.testbed.framework.TestbedSettings;
@@ -20,20 +21,28 @@ import org.jbox2d.testbed.framework.TestbedSettings;
 import cs526.controls.PdController;
 import cs526.controls.VirtualPdController;
 
-public class BipedWalker extends AutoLoadedTest {
+public class SimulatedBipedWalker extends SimulatedAutoLoadedTest {
 
+	public SimulatedBipedWalker(World world, float[] dths)
+	{
+		super(world);
+		this.dths = dths.clone();
+	}
+	
 	// 
 	/**
 	 * compensate angles
 	 */
-	float[] dths = new float[] {-0.683f, 0f, 0f};
+	float[] dths ;
 	
 	@Override
-	public void initTest(boolean argDeserialized) {
+	public void initTest() {
+
 		for (int i=0; i < dths.length ; i++)
 		{
 			dths[i] = (float) Math.toRadians(dths[i]);
 		}
+		
 		frictionMotorTorque = 0.0f;
 		DEFAULT_GRAVITY = 1.0f;
 		gravity = 1.0f;
@@ -55,9 +64,8 @@ public class BipedWalker extends AutoLoadedTest {
 //		roadBlock.createFixture(circle, 2.0f);
 
 		// TODO Auto-generated method stub
-		super.initTest(argDeserialized);
+		super.initTest();
 
-		super.setCamera(new Vec2(0f, 0f), 20f);
 
 		virtualControls.put("torso",
 				new VirtualPdController(model.getLinkByName("torso"), 0.125f,
@@ -72,14 +80,14 @@ public class BipedWalker extends AutoLoadedTest {
 		Body torso = getTorso();
 		torso.setActive(true);
 			
-		File file = new File("data.csv");
-		
-		try {
-			writer = new PrintStream(file);
-		}catch (Exception e) {
-			// TODO: handle exception
-		}
-		writer.println("stance_anckle, swing_anckle, com, com-stance, com-swing, velocity, angle_compensation");
+//		File file = new File("data.csv");
+//		
+//		try {
+//			writer = new PrintStream(file);
+//		}catch (Exception e) {
+//			// TODO: handle exception
+//		}
+//		writer.println("stance_anckle, swing_anckle, com, com-stance, com-swing, velocity, angle_compensation");
 				
 	}
 	PrintStream writer;
@@ -96,8 +104,8 @@ public class BipedWalker extends AutoLoadedTest {
 	}
 
 	@Override
-	public synchronized void step(TestbedSettings settings) {
-		super.step(settings);
+	public synchronized void step(int hz) {
+		super.step(hz);
 
 		float virtualTorque = 0.0f;
 		int stateId = model.getCurrentStateId();
@@ -119,13 +127,11 @@ public class BipedWalker extends AutoLoadedTest {
 			swingAnkleX = getRightAnklePosX();
 		}
 
-		addTextLine(String.format("d is: %2.2f", com - stanceAnkleX));
-		addTextLine(String.format("velocity is: %2.2f", velocity));
+		
 
 		float sumOfXDiffer = 2 * com - stanceAnkleX - swingAnkleX;
 		float differStanceSwing = stanceAnkleX - swingAnkleX;
-		addTextLine(String.format("sum of d is  is: %2.2f", sumOfXDiffer));
-
+		
 		float compensateAngle = compensateAngle(2*com - stanceAnkleX - swingAnkleX, velocity);
 		float timeStepScale = compensateAngle / angle + 1;
 
@@ -133,20 +139,15 @@ public class BipedWalker extends AutoLoadedTest {
 		m_angle += compensateAngle;
 
 		model.scaleStepTime(timeStepScale);
-		addTextLine(String.format("compensate angle is: %2.2f",
-				(float) Math.toDegrees(compensateAngle)));
+		
 
 		// addTextLine(String.format("timestep scale is: %2.2f",
 		// (float)timeStepScale));
-		addTextLine(String.format("time step is: %2.2f",
-				(float) model.getStepTime()));
-
-		addTextLine(String.format("swing - stance is %2.2f", swingAnkleX
-				- stanceAnkleX));
 		
-		if (getStepCount() <= 600 && getStepCount() % 60 == 0)
-//		writer.println("stance_anckle, swing_anckle, com, com-stance, com-swing, velocity, angle_compensation");
-			writer.printf("%2.3f %2.3f %2.3f %2.3f %2.3f %2.3f %2.3f\n", stanceAnkleX, swingAnkleX, com, com-stanceAnkleX, com-swingAnkleX, velocity, compensateAngle);
+		
+//		if (getStepCount() % 6 == 0)
+////		writer.println("stance_anckle, swing_anckle, com, com-stance, com-swing, velocity, angle_compensation");
+//			writer.printf("%2.3f %2.3f %2.3f %2.3f %2.3f %2.3f %2.3f\n", stanceAnkleX, swingAnkleX, com, com-stanceAnkleX, com-swingAnkleX, velocity, compensateAngle);
 		
 		
 		switch (stateId) {
@@ -156,7 +157,7 @@ public class BipedWalker extends AutoLoadedTest {
 			virtualTorque += virtualControls.get("l_up_leg").moveTo(angle + dths[0]);
 			model.getLinkByName("r_up_leg").applyTorque(-virtualTorque);
 			model.setNewTargetAngleCompensate("l_knee", dths[1]);
-			addTextLine("left");
+			
 			break;
 		case 1:
 			virtualTorque = virtualControls.get("torso").moveTo(zero);
@@ -164,14 +165,14 @@ public class BipedWalker extends AutoLoadedTest {
 			model.getLinkByName("r_up_leg").applyTorque(-virtualTorque);
 			if (rightSwing && !leftSwing)
 				model.nextState();
-			addTextLine("left");
+			
 			break;
 		case 2:
 			virtualTorque = virtualControls.get("torso").moveTo(zero );
 			virtualTorque += virtualControls.get("r_up_leg").moveTo(angle + dths[0]);
 			model.getLinkByName("l_up_leg").applyTorque(-virtualTorque);
 			model.setNewTargetAngleCompensate("r_knee", dths[1]);
-			addTextLine("right");
+			
 			break;
 		case 3:
 			virtualTorque = virtualControls.get("torso").moveTo(zero);
@@ -180,30 +181,14 @@ public class BipedWalker extends AutoLoadedTest {
 			model.getLinkByName("l_up_leg").applyTorque(-virtualTorque);
 			if (leftSwing && !rightSwing)
 				model.nextState();
-			addTextLine("right");
+			
 			break;
 
 		}
 
 	}
 
-	@Override
-	public void keyPressed(char key, int argKeyCode) {
-		Body torso = getTorso();
-		switch (key) {
-		case 'd': // right key
-			getModel().getKeys()['d'] = false;
-			torso.applyTorque(-.5f);
-			break;
-
-		case 'a':
-			getModel().getKeys()['a'] = false;
-			torso.applyTorque(.5f);
-			break;
-		}
-		super.keyPressed(key, argKeyCode);
-	}
-
+	
 	boolean leftSwing = true;
 	boolean rightSwing = true;
 	float com = 0.0f;
@@ -232,7 +217,7 @@ public class BipedWalker extends AutoLoadedTest {
 			rightSwing = true;
 			// com = torso.getWorldPoint(new Vec2(0, -0.2f)).x;
 			// stanceKnee = ;
-			System.out.println("left foot contact");
+//			System.out.println("left foot contact");
 
 		}
 
@@ -242,7 +227,7 @@ public class BipedWalker extends AutoLoadedTest {
 			leftSwing = true;
 			// com = torso.getWorldPoint(new Vec2(0, -0.2f)).x;
 			// stanceKnee = ;
-			System.out.println("right foot contact");
+//			System.out.println("right foot contact");
 		}
 
 	}
@@ -251,17 +236,22 @@ public class BipedWalker extends AutoLoadedTest {
 		return model.getLinkByName("torso");
 	}
 
-	private float getComX() {
+	public float getComX() {
 		Body torso = model.getLinkByName("torso");
 		return torso.getWorldPoint(new Vec2(0, -0.2f)).x;
 	}
+	
+	public float getComY() {
+		Body torso = model.getLinkByName("torso");
+		return torso.getWorldPoint(new Vec2(0, -0.2f)).y;
+	}
 
-	private float getLeftAnklePosX() {
+	public float getLeftAnklePosX() {
 		return model.getLinkByName("l_bottom_leg").getWorldPoint(
 				new Vec2(0, -0.25f)).x;
 	}
 
-	private float getRightAnklePosX() {
+	public float getRightAnklePosX() {
 		return model.getLinkByName("r_bottom_leg").getWorldPoint(
 				new Vec2(0, -0.25f)).x;
 	}

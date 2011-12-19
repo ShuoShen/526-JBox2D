@@ -24,12 +24,17 @@
 /**
  * Created at 7:50:04 AM Jan 20, 2011
  */
-package cs526.jbox2dTests;
+package cs526.simu;
 
+import org.jbox2d.callbacks.ContactImpulse;
+import org.jbox2d.callbacks.ContactListener;
+import org.jbox2d.collision.Manifold;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
+import org.jbox2d.dynamics.World;
+import org.jbox2d.dynamics.contacts.Contact;
 import org.jbox2d.testbed.framework.TestbedSettings;
 import org.jbox2d.testbed.framework.TestbedTest;
 
@@ -46,27 +51,31 @@ import cs526.models.CharacterModel;
  * 
  * @author Shuo Shen
  */
-public abstract class AutoLoadedTest extends TestbedTest {
+public abstract class SimulatedAutoLoadedTest implements ContactListener {
 
-	@Override
-	public boolean isSaveLoadEnabled() {
-		return true;
-	}
 
 	float gravity = 0.0f;
 	float DEFAULT_GRAVITY = 10.0f;
 	float frictionMotorTorque = 10.0f;
 	CharacterInfo modelInfo;
 	CharacterModel model;
+World world;
 
+	public World getWorld()
+	{
+		return world;
+	}
+
+	public SimulatedAutoLoadedTest(World world)
+	{
+		this.world = world;
+	}
 	/**
 	 * @see org.jbox2d.testbed.framework.TestbedTest#initTest(boolean)
 	 */
-	@Override
-	public void initTest(boolean argDeserialized) {
-		if (argDeserialized) {
-			return;
-		}
+	
+	public void initTest() {
+		getWorld().setContactListener(this);
 		createGround();
 		createCharater();
 	}
@@ -77,7 +86,7 @@ public abstract class AutoLoadedTest extends TestbedTest {
 			Body ground = getWorld().createBody(bd);
 
 			PolygonShape shape = new PolygonShape();
-			shape.setAsEdge(new Vec2(-40.0f, 0.0f), new Vec2(40.0f, 0.0f));
+			shape.setAsEdge(new Vec2(-40.0f, 0.0f), new Vec2(4000000.0f, 0.0f));
 			ground.createFixture(shape, 0.0f);
 			getWorld().setGravity(new Vec2(0, -gravity));
 		}
@@ -88,50 +97,44 @@ public abstract class AutoLoadedTest extends TestbedTest {
 		model = new CharacterModel(getWorld(), modelInfo, frictionMotorTorque);
 	}
 
-	@Override
-	public synchronized void step(TestbedSettings settings) {
-		super.step(settings);
-		addTextLine("Press 'g' to toggle gravity");
-		addTextLine("Press 'k' to activate move.");
-//		addTextLine("Press 'd' to deactivate move.");
-		addTextLine("Press 'n' to next state.");
-		addTextLine("Current state is :" + model.getCurrentStateId());
-//		addTextLine("elapsed time is :" + model.getElapsedCurrentTime());
-
-		model.driveToDesiredState(settings.getSetting(TestbedSettings.Hz).value);
+	int stepCount = 0;
+	public int getStepCount()
+	{
+		return stepCount;
+	}
+	
+	public void step(int hz) {
+		
+		
+		float timeStep = 1f/ hz; 
+		
+		model.driveToDesiredState((int)hz);
+		getWorld().step(timeStep,
+				3,
+				8);
+		stepCount++;
 	}
 
 	@Override
-	public void keyPressed(char key, int argKeyCode) {
-		switch (key) {
-		case 'g':
-			gravity = DEFAULT_GRAVITY - gravity;
-			getWorld().setGravity(new Vec2(0, -gravity));
-			break;
+	public void beginContact(Contact contact) {
+				
+	}
 
-		case 'k':
-			getModel().getKeys()['k'] = false;
-			// model.nextState();
-			if (model.isActivated())
-				model.deactivateMotion();
-			else
-				model.activateMotion();
-			break;
+	@Override
+	public void endContact(Contact contact) {
+				
+	}
 
+	@Override
+	public void preSolve(Contact contact, Manifold oldManifold) {
+				
+	}
 
-			
-		case 'n':
-			getModel().getKeys()['n'] = false;
-			System.out.println("n");
-			model.nextState();
-			break;
-		}
+	@Override
+	public void postSolve(Contact contact, ContactImpulse impulse) {
 		
 	}
 
-	@Override
-	public String getTestName() {
-		return this.getClass().getSimpleName();
-	}
+	
 
 }
