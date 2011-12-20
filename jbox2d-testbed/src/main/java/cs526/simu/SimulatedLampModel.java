@@ -24,10 +24,11 @@
 /**
  * Created at 7:50:04 AM Jan 20, 2011
  */
-package cs526.jbox2dTests;
+package cs526.simu;
 
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
+import org.jbox2d.dynamics.World;
 import org.jbox2d.testbed.framework.TestbedSettings;
 
 
@@ -35,15 +36,21 @@ import org.jbox2d.testbed.framework.TestbedSettings;
 /**
  * @author Shuo Shen
  */
-public class LampModel extends AutoLoadedTest {
+public class SimulatedLampModel extends SimulatedAutoLoadedTest {
 	
-	float[] stepChange = {0f, 0.130261f, 0.188949f};
+	float[] stepChange = {0.1f, 0.1f, 0.1f};
+	
+	public SimulatedLampModel(World world, float[] stepChange)
+	{
+		super(world);
+		this.stepChange = stepChange.clone();  
+	}
 	
 	@Override
-	public void initTest(boolean argDeserialized) {
+	public void initTest() {
 		gravity = DEFAULT_GRAVITY - gravity;
 		// TODO Auto-generated method stub
-		super.initTest(argDeserialized);
+		super.initTest();
 		model.activateMotion();
 	}
 	
@@ -56,17 +63,13 @@ public class LampModel extends AutoLoadedTest {
 	
 	
 	@Override
-	public synchronized void step(TestbedSettings settings) {
+	public synchronized void step(int hz) {
 		// TODO Auto-generated method stub
-		super.step(settings);
+		super.step(hz);
 		
 		int stateId = model.getCurrentStateId();
 		model.scaleStepTime(stepChange[stateId]);
 	}
 
-	@Override
-	public String getTestName() {
-		return "Lamp Model";
-	}
 
 }

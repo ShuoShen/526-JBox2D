@@ -102,14 +102,20 @@ public class CharacterModel {
 	public float getStepTime()
 	{
 		if (activated)
-			return getCurrentDesiredState().getStepTime() * scale;
+			return getCurrentDesiredState().getStepTime() * scale + change;
 		return Float.MAX_VALUE;
 	}
 	
 	private float scale = 1.0f;
+	private float change = 1.0f;
 	public void scaleStepTime(float scale)
 	{
 		this.scale = Math.abs(scale);
+	}
+	
+	public void changeStepTime(float change)
+	{
+		this.change = change;
 	}
 	
 	public void driveToDesiredState(int hz)

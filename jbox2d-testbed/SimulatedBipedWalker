@@ -1,0 +1,40 @@
+Links
+# see the paper windup toys
+# link_name width 	height   mass
+  torso		0.2		0.4		 0.04
+  l_up_leg	0.2		0.5		0.025
+  r_up_leg	0.1		0.5		0.025
+  l_bottom_leg	0.1		0.5		0.025
+  r_bottom_leg	0.1		0.5		0.025
+  l_foot		0.1		0.2		0.01
+  r_foot		0.1		0.2		0.01 		
+00
+
+Joints
+# joint_name	link_a	link_a_position	link_b	link_b_position	upper_angle	lower_angle
+  l_pelvis		torso	Bottom			l_up_leg	Top		90				-90
+  r_pelvis		torso	Bottom			r_up_leg	Top		90				-90
+  l_knee		l_up_leg	Bottom		l_bottom_leg	Top	0				-90
+  r_knee		r_up_leg	Bottom		r_bottom_leg	Top	0				-90
+  l_ankle		l_bottom_leg	Bottom	l_foot	Middle			120				90
+  r_ankle		r_bottom_leg	Bottom	r_foot	Middle			120				90	
+00
+
+Controllers
+# joint_name 	ks		kd
+ l_pelvis		0.28	0.025
+  r_pelvis		0.28	0.025
+  l_knee		0.08	0.025
+  r_knee		0.08	0.025
+  l_ankle		0.01	0.002
+  r_ankle		0.01	0.002
+00
+
+States
+# timestep 	number_joints		joint_name1	desired_angle1 joint_name2 desired_angle2 ...  
+  1.0		4		l_knee -60 l_ankle 90 r_knee 0 r_ankle 90
+  1.0		4		l_knee 0 l_ankle 90	r_knee 0 r_ankle 90
+  1.0		4		l_knee 0 l_ankle 90  r_knee -60 r_ankle 90
+  1.0		4		l_knee 0 l_ankle 90  r_knee 0 r_ankle 90 
+00	
+

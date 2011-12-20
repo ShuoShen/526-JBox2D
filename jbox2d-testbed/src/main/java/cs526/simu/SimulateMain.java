@@ -19,11 +19,14 @@ public class SimulateMain {
 		int hz = 60;
 		int seconds = 30;
 		
+//		SimulatedLampModel lamp = getLamp(new float[] {0, 0, 0});
+//		System.out.println(jumpForSeconds(lamp, hz, seconds));
+		
 		SimulatedBipedWalker walker = getWalker(new float[] { -5f, 0.000000f, 0});
 		System.out.println(walkForSeconds(walker, hz, seconds));
 		
-		hillClimbing(new float[] {-5f, 0f, 0.0f}, 2f, 100, hz, seconds);
-		
+		hillClimbing(new float[] {-5f, 0f, 0.0f}, 0.2f, 10, hz, seconds);
+//		hillClimbingForLamp(new float[]{0, 0, 0}, 0.2f, 20, hz, seconds);
 		
 		System.out.println("done");
 		
@@ -71,6 +74,69 @@ public class SimulateMain {
 		SimulatedBipedWalker walker = new SimulatedBipedWalker(world, dths);
 		walker.initTest();
 		return walker;
+	}
+	
+	private static float jumpForSeconds(SimulatedLampModel lamp, int hz, int seconds)
+	{
+		
+		while(lamp.getStepCount() <= hz * seconds)
+		{
+			lamp.step(hz);
+			
+		}
+		
+			return lamp.getComX();
+	}
+	
+	
+	private static SimulatedLampModel getLamp(float[] timeChange) {
+		Vec2  gravity = new Vec2(0.0f, -1.0f);
+		boolean doSleep = true;
+		World world = new World(gravity, doSleep);
+				
+		SimulatedLampModel lamp = new SimulatedLampModel(world, timeChange);
+		lamp.initTest();
+		return lamp;
+	}
+	
+	public static void hillClimbingForLamp(float[] start, float stepLimit, int attempts, int hz, int seconds)
+	{
+	
+		int iterations = 100;
+		
+		float[] current = start.clone();
+		SimulatedLampModel lamp = getLamp(current);
+		float currentEval = jumpForSeconds(lamp, hz, seconds);
+		for (int i = 0; i < iterations; i++)
+		{
+			float[] maxNode = current;
+			float maxEval = currentEval;
+			for (float[] next : neighbours(current, stepLimit, attempts))
+			{
+				lamp = getLamp(next);
+				float nextEval = jumpForSeconds(lamp, hz, seconds);
+				if (nextEval > maxEval)
+				{
+					maxNode = next;
+					maxEval = nextEval;
+				}
+			}
+			if (maxNode == current)
+			{
+				break;
+			}
+			else
+			{
+				System.out.printf("iteration %d, maxEval %.2f ", i, maxEval);
+				for (float f : maxNode)
+				{
+					System.out.printf("%f, ", f);
+				}
+				System.out.println();
+				current = maxNode;
+				currentEval = maxEval;
+			}
+		}
 	}
 	
 	public static void hillClimbing(float[] start, float stepLimit, int attempts, int hz, int seconds)
