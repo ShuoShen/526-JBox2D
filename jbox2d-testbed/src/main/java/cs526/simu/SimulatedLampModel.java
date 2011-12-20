@@ -38,7 +38,7 @@ import org.jbox2d.testbed.framework.TestbedSettings;
  */
 public class SimulatedLampModel extends SimulatedAutoLoadedTest {
 	
-	float[] stepChange = {0.1f, 0.1f, 0.1f};
+	float[] stepChange = {0.185806f, 0.267656f, 0.092896f};
 	
 	public SimulatedLampModel(World world, float[] stepChange)
 	{
@@ -59,8 +59,7 @@ public class SimulatedLampModel extends SimulatedAutoLoadedTest {
 		Body torso = model.getLinkByName("b1");
 		return torso.getWorldPoint(new Vec2(0, -0.2f)).x;
 	}
-	
-	
+		
 	
 	@Override
 	public synchronized void step(int hz) {
@@ -68,8 +67,9 @@ public class SimulatedLampModel extends SimulatedAutoLoadedTest {
 		super.step(hz);
 		
 		int stateId = model.getCurrentStateId();
-		model.scaleStepTime(stepChange[stateId]);
+		model.changeStepTime(stepChange[stateId]);
 	}
+	
 
 
 }

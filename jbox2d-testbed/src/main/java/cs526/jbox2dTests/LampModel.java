@@ -37,7 +37,9 @@ import org.jbox2d.testbed.framework.TestbedSettings;
  */
 public class LampModel extends AutoLoadedTest {
 	
-	float[] stepChange = {0f, 0.130261f, 0.188949f};
+	float[] stepChange = {-0.260559f, -0.100000f, -0.192329f};
+	
+	
 	
 	@Override
 	public void initTest(boolean argDeserialized) {
@@ -45,6 +47,7 @@ public class LampModel extends AutoLoadedTest {
 		// TODO Auto-generated method stub
 		super.initTest(argDeserialized);
 		model.activateMotion();
+		stepChange = new float[] {-0.1f, 0f, 0f};
 	}
 	
 	public float getComX()
@@ -54,14 +57,13 @@ public class LampModel extends AutoLoadedTest {
 	}
 	
 	
-	
 	@Override
 	public synchronized void step(TestbedSettings settings) {
 		// TODO Auto-generated method stub
 		super.step(settings);
 		
 		int stateId = model.getCurrentStateId();
-		model.scaleStepTime(stepChange[stateId]);
+		model.changeStepTime(stepChange[stateId]);
 	}
 
 	@Override

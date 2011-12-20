@@ -93,7 +93,7 @@ public class CharacterModel {
 		currentStateId = (currentStateId + 1) % characterInfo.nStates();
 		startStep = currentStep;
 		scale = 1.0f;
-
+		change = 0.0f;
 		return currentStateId;
 	}
 	
@@ -107,7 +107,7 @@ public class CharacterModel {
 	}
 	
 	private float scale = 1.0f;
-	private float change = 1.0f;
+	private float change = 0.0f;
 	public void scaleStepTime(float scale)
 	{
 		this.scale = Math.abs(scale);

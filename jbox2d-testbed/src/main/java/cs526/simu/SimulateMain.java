@@ -19,14 +19,14 @@ public class SimulateMain {
 		int hz = 60;
 		int seconds = 30;
 		
-//		SimulatedLampModel lamp = getLamp(new float[] {0, 0, 0});
-//		System.out.println(jumpForSeconds(lamp, hz, seconds));
+		SimulatedLampModel lamp = getLamp(new float[] {-0.1f, -0.1f, -0.1f});
+		System.out.println(jumpForSeconds(lamp, hz, seconds));
 		
-		SimulatedBipedWalker walker = getWalker(new float[] { -5f, 0.000000f, 0});
-		System.out.println(walkForSeconds(walker, hz, seconds));
+//		SimulatedBipedWalker walker = getWalker(new float[] { -5f, 0.000000f, 0});
+//		System.out.println(walkForSeconds(walker, hz, seconds));
 		
-		hillClimbing(new float[] {-5f, 0f, 0.0f}, 0.2f, 10, hz, seconds);
-//		hillClimbingForLamp(new float[]{0, 0, 0}, 0.2f, 20, hz, seconds);
+//		hillClimbing(new float[] {-5f, 0f, 0.0f}, 0.4f, 30, hz, seconds);
+		hillClimbingForLamp(new float[]{-0.1f, -0.1f, -0.1f}, 0.1f, 30, hz, seconds);
 		
 		System.out.println("done");
 		
@@ -193,7 +193,7 @@ public class SimulateMain {
 				Random random = new Random();
 				
 				float[] next = current.clone();
-				next[i] = current[i] + stepLimit * random.nextFloat(); 
+				next[i] = current[i] + stepLimit * 2  * (random.nextFloat() - 0.5f); 
 				results.add(next);
 			}
 		}
