@@ -209,7 +209,8 @@ public class BipedWalker extends AutoLoadedTest {
 	float com = 0.0f;
 	float stanceAnkleX = 0.0f;
 	float swingAnkleX = 0.0f;
-
+	boolean  firstActivation = true;
+	
 	@Override
 	public void preSolve(Contact contact, Manifold oldManifold) {
 		// TODO Auto-generated method stub
@@ -223,8 +224,11 @@ public class BipedWalker extends AutoLoadedTest {
 
 		if (a == roadBlock)
 			System.out.println("road block");
-		if (!model.isActivated())
+		if (firstActivation && !model.isActivated() )
+		{
 			model.activateMotion();
+			firstActivation = false;
+		}
 		
 		if (b == leftFoot && leftSwing
 				&& leftFoot.getWorldCenter().x > rightFoot.getWorldCenter().x) {

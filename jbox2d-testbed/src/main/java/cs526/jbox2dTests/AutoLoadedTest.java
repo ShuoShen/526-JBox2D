@@ -113,9 +113,15 @@ public abstract class AutoLoadedTest extends TestbedTest {
 			getModel().getKeys()['k'] = false;
 			// model.nextState();
 			if (model.isActivated())
+			{
 				model.deactivateMotion();
+				System.out.println("activate");
+			}
 			else
+			{
 				model.activateMotion();
+				System.out.println("deactivate");
+			}
 			break;
 
 
