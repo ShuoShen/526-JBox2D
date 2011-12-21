@@ -40,20 +40,19 @@ public class LampModel extends AutoLoadedTest {
 	float[] stepChange = {-0.260559f, -0.100000f, -0.192329f};
 	
 	
-	
 	@Override
 	public void initTest(boolean argDeserialized) {
 		gravity = DEFAULT_GRAVITY - gravity;
 		// TODO Auto-generated method stub
 		super.initTest(argDeserialized);
 		model.activateMotion();
-		stepChange = new float[] {-0.1f, 0f, 0f};
+		stepChange = new float[] {-0.215095f, -0.042396f, -0.192406f};
 	}
 	
 	public float getComX()
 	{
 		Body torso = model.getLinkByName("b1");
-		return torso.getWorldPoint(new Vec2(0, -0.2f)).x;
+		return torso.getWorldPoint(new Vec2(0, 0f)).x;
 	}
 	
 	

@@ -80,17 +80,17 @@ public class SimulatedBipedWalker extends SimulatedAutoLoadedTest {
 		Body torso = getTorso();
 		torso.setActive(true);
 			
-//		File file = new File("data.csv");
-//		
-//		try {
-//			writer = new PrintStream(file);
-//		}catch (Exception e) {
-//			// TODO: handle exception
-//		}
-//		writer.println("stance_anckle, swing_anckle, com, com-stance, com-swing, velocity, angle_compensation");
+		File file = new File("walker.csv");
+		
+		try {
+			print = new PrintStream(file);
+		}catch (Exception e) {
+			// TODO: handle exception
+		}
+		print.println("time speed");
 				
 	}
-	PrintStream writer;
+	PrintStream print;
 		
 	private Body roadBlock;
 
@@ -103,6 +103,8 @@ public class SimulatedBipedWalker extends SimulatedAutoLoadedTest {
 		return 0.0f;
 	}
 
+
+	
 	@Override
 	public synchronized void step(int hz) {
 		super.step(hz);
@@ -140,6 +142,14 @@ public class SimulatedBipedWalker extends SimulatedAutoLoadedTest {
 
 		model.scaleStepTime(timeStepScale);
 		
+		int stepCount = getStepCount();
+		int remainder = stepCount % hz; 
+		if (remainder == hz / 2 || remainder == 0)
+		{
+			float time = (float) stepCount / hz;
+			
+			print.printf("%f %f\n", time, velocity);
+		}
 
 		// addTextLine(String.format("timestep scale is: %2.2f",
 		// (float)timeStepScale));

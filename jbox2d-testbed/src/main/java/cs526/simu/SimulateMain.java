@@ -19,10 +19,10 @@ public class SimulateMain {
 		int hz = 60;
 		int seconds = 30;
 		
-		SimulatedLampModel lamp = getLamp(new float[] {-0.1f, -0.1f, -0.1f});
+		SimulatedLampModel lamp = getLamp(new float[] {-0.215095f, -0.042396f, -0.192406f});
 		System.out.println(jumpForSeconds(lamp, hz, seconds));
 		
-//		SimulatedBipedWalker walker = getWalker(new float[] { -5f, 0.000000f, 0});
+//		SimulatedBipedWalker walker = getWalker(new float[] { -2.961200f, 1.656718f, 0.264455f});
 //		System.out.println(walkForSeconds(walker, hz, seconds));
 		
 //		hillClimbing(new float[] {-5f, 0f, 0.0f}, 0.4f, 30, hz, seconds);

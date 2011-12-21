@@ -26,6 +26,10 @@
  */
 package cs526.simu;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
+
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.World;
@@ -44,8 +48,19 @@ public class SimulatedLampModel extends SimulatedAutoLoadedTest {
 	{
 		super(world);
 		this.stepChange = stepChange.clone();  
+		
+		
+		try {
+			print = new PrintStream(new File("lamp.csv"));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		print.println("time velocity");
+		
 	}
-	
+	PrintStream print;
 	@Override
 	public void initTest() {
 		gravity = DEFAULT_GRAVITY - gravity;
@@ -57,14 +72,31 @@ public class SimulatedLampModel extends SimulatedAutoLoadedTest {
 	public float getComX()
 	{
 		Body torso = model.getLinkByName("b1");
-		return torso.getWorldPoint(new Vec2(0, -0.2f)).x;
+		return torso.getWorldPoint(new Vec2(0, 0.0f)).x;
 	}
 		
+	public float getComVelocityX()
+	{
+		Body torso = model.getLinkByName("b1");
+		return torso.getLinearVelocityFromLocalPoint(new Vec2(0f, 0f)).x;
+	}
 	
 	@Override
 	public synchronized void step(int hz) {
+		
+		
 		// TODO Auto-generated method stub
 		super.step(hz);
+		
+		int stepCount = getStepCount();
+		int remainder = stepCount % hz; 
+		if (remainder == hz / 2 || remainder == 0)
+		{
+			float time = (float) stepCount / hz;
+			float velocity = getComVelocityX();
+			print.printf("%f %f\n", time, velocity);
+		}
+		
 		
 		int stateId = model.getCurrentStateId();
 		model.changeStepTime(stepChange[stateId]);
