@@ -82,7 +82,7 @@ public class SimulatedLampModel extends SimulatedAutoLoadedTest {
 	}
 	
 	@Override
-	public synchronized void step(int hz) {
+	public void step(int hz) {
 		
 		
 		// TODO Auto-generated method stub
@@ -100,6 +100,9 @@ public class SimulatedLampModel extends SimulatedAutoLoadedTest {
 		
 		int stateId = model.getCurrentStateId();
 		model.changeStepTime(stepChange[stateId]);
+		
+//		if (getStepCount() == 60 * 30)
+//			System.out.println("Distance is " + getComX());
 	}
 	
 

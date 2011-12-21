@@ -37,7 +37,7 @@ import org.jbox2d.testbed.framework.TestbedSettings;
  */
 public class LampModel extends AutoLoadedTest {
 	
-	float[] stepChange = {-0.260559f, -0.100000f, -0.192329f};
+	float[] stepChange = {-0.25f, -0.038972f, -0.227396f};
 	
 	
 	@Override
@@ -46,13 +46,13 @@ public class LampModel extends AutoLoadedTest {
 		// TODO Auto-generated method stub
 		super.initTest(argDeserialized);
 		model.activateMotion();
-		stepChange = new float[] {-0.215095f, -0.042396f, -0.192406f};
+		
 	}
 	
 	public float getComX()
 	{
 		Body torso = model.getLinkByName("b1");
-		return torso.getWorldPoint(new Vec2(0, 0f)).x;
+		return torso.getWorldPoint(new Vec2(0, 0.0f)).x;
 	}
 	
 	
@@ -63,6 +63,9 @@ public class LampModel extends AutoLoadedTest {
 		
 		int stateId = model.getCurrentStateId();
 		model.changeStepTime(stepChange[stateId]);
+		
+		if (getStepCount() == 60 * 30)
+			System.out.println("Distance is " + getComX());
 	}
 
 	@Override

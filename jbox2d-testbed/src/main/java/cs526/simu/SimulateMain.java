@@ -19,14 +19,14 @@ public class SimulateMain {
 		int hz = 60;
 		int seconds = 30;
 		
-		SimulatedLampModel lamp = getLamp(new float[] {-0.215095f, -0.042396f, -0.192406f});
+		SimulatedLampModel lamp = getLamp(new float[] {-0.0f, -0.0f, -0.0f});
 		System.out.println(jumpForSeconds(lamp, hz, seconds));
 		
 //		SimulatedBipedWalker walker = getWalker(new float[] { -2.961200f, 1.656718f, 0.264455f});
 //		System.out.println(walkForSeconds(walker, hz, seconds));
 		
 //		hillClimbing(new float[] {-5f, 0f, 0.0f}, 0.4f, 30, hz, seconds);
-		hillClimbingForLamp(new float[]{-0.1f, -0.1f, -0.1f}, 0.1f, 30, hz, seconds);
+		hillClimbingForLamp(new float[]{-0.0f, -0.0f, -0.0f}, 0.1f, 30, hz, seconds);
 		
 		System.out.println("done");
 		
@@ -78,19 +78,17 @@ public class SimulateMain {
 	
 	private static float jumpForSeconds(SimulatedLampModel lamp, int hz, int seconds)
 	{
-		
 		while(lamp.getStepCount() <= hz * seconds)
 		{
-			lamp.step(hz);
 			
+			lamp.step(hz);
 		}
-		
-			return lamp.getComX();
+		return lamp.getComX();
 	}
 	
 	
 	private static SimulatedLampModel getLamp(float[] timeChange) {
-		Vec2  gravity = new Vec2(0.0f, -1.0f);
+		Vec2  gravity = new Vec2(0.0f, -10.0f);
 		boolean doSleep = true;
 		World world = new World(gravity, doSleep);
 				

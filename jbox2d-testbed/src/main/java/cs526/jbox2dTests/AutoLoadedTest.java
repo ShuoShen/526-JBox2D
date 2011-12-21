@@ -77,7 +77,7 @@ public abstract class AutoLoadedTest extends TestbedTest {
 			Body ground = getWorld().createBody(bd);
 
 			PolygonShape shape = new PolygonShape();
-			shape.setAsEdge(new Vec2(-40.0f, 0.0f), new Vec2(40.0f, 0.0f));
+			shape.setAsEdge(new Vec2(-40.0f, 0.0f), new Vec2(4000.0f, 0.0f));
 			ground.createFixture(shape, 0.0f);
 			getWorld().setGravity(new Vec2(0, -gravity));
 		}

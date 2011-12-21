@@ -26,7 +26,7 @@ public class BipedWalker extends AutoLoadedTest {
 	/**
 	 * compensate angles
 	 */
-	float[] dths = new float[] {0f, 0f, 0f};
+	float[] dths = new float[] {-0.5f, 0f, 0f};
 	
 	@Override
 	public void initTest(boolean argDeserialized) {

@@ -104,15 +104,17 @@ World world;
 	}
 	
 	public void step(int hz) {
-		
-		
 		float timeStep = 1f/ hz; 
 		
-		model.driveToDesiredState((int)hz);
 		getWorld().step(timeStep,
-				3,
-				8);
+				8,
+				3);
+		
 		stepCount++;
+		
+		model.driveToDesiredState((int)hz);
+		
+		
 	}
 
 	@Override
