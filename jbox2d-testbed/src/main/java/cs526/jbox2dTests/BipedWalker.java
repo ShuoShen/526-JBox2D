@@ -19,6 +19,7 @@ import org.jbox2d.testbed.framework.TestbedSettings;
 
 import cs526.controls.PdController;
 import cs526.controls.VirtualPdController;
+import cs526.utilities.WalkingStatesConverter;
 
 public class BipedWalker extends AutoLoadedTest {
 
@@ -26,10 +27,16 @@ public class BipedWalker extends AutoLoadedTest {
 	/**
 	 * compensate angles
 	 */
-	float[] dths = new float[] {-0.5f, 0f, 0f};
+	float[] dths = new float[] {-1.100531f, -0.042071f, 0.000000f};
+	
+	public BipedWalker()
+	{
+		super(new WalkingStatesConverter(), null);
+	}
 	
 	@Override
 	public void initTest(boolean argDeserialized) {
+		firstActivation = true;
 		for (int i=0; i < dths.length ; i++)
 		{
 			dths[i] = (float) Math.toRadians(dths[i]);
@@ -57,7 +64,7 @@ public class BipedWalker extends AutoLoadedTest {
 		// TODO Auto-generated method stub
 		super.initTest(argDeserialized);
 
-		super.setCamera(new Vec2(0f, 0f), 20f);
+		super.setCamera(new Vec2(0f, 0f), 80f);
 
 		virtualControls.put("torso",
 				new VirtualPdController(model.getLinkByName("torso"), 0.125f,

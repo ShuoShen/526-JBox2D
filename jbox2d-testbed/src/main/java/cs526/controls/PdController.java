@@ -13,13 +13,13 @@ public abstract class PdController {
 	float Ki = 0;
 	public float torque; 
 	
-	public float moveTo(float targetAngle){
+	public float moveTo(double targetAngle){
 		
-		this.targetAngle = targetAngle;
+		this.targetAngle = (float)targetAngle;
 		float P,  D, diffAngle, derivDiffAngle;
 				
 		currentAngle = getCurrentAngle();
-		diffAngle =  targetAngle - currentAngle;
+		diffAngle =  (float)targetAngle - currentAngle;
 		
 		derivDiffAngle = getAngularVelocity();
 		

@@ -23,9 +23,9 @@ import cs526.controls.VirtualPdController;
 
 public class SimulatedBipedWalker extends SimulatedAutoLoadedTest {
 
-	public SimulatedBipedWalker(World world, float[] dths)
+	public SimulatedBipedWalker(World world, double[] dths)
 	{
-		super(world);
+		super(world, null, null);
 		this.dths = dths.clone();
 	}
 	
@@ -33,7 +33,7 @@ public class SimulatedBipedWalker extends SimulatedAutoLoadedTest {
 	/**
 	 * compensate angles
 	 */
-	float[] dths ;
+	double[] dths ;
 	
 	@Override
 	public void initTest() {

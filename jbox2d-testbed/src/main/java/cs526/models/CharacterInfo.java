@@ -45,11 +45,18 @@ public class CharacterInfo {
 	private HashMap<String, ControllerInfo> controllerInfoMap = new HashMap<String, ControllerInfo>();
 	private ArrayList<DesiredState> states = new ArrayList<DesiredState>();
 	
+	
+	public CharacterInfo(Object obj)
+	{
+		this(obj, null);
+	}
+	
+	
 	/**
 	 * The constructor is used to load a character model from a file
 	 * @param obj a file with the same name as the name of the obj's class will be loaded.
 	 */
-	public CharacterInfo(Object obj)
+	public CharacterInfo(Object obj, Scanner statesScanner)
 	{
 		Scanner scanner = null;
 		String fileName = obj.getClass().getSimpleName();
@@ -83,6 +90,8 @@ public class CharacterInfo {
 			}
 			else if (STATES.compareToIgnoreCase(line.trim()) == 0)
 			{
+				if (statesScanner != null)
+					scanner = statesScanner;
 				StatesLoader.loadStates(scanner, states);
 			}
 		}

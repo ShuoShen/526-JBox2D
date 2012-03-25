@@ -30,6 +30,8 @@ import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.testbed.framework.TestbedSettings;
 
+import cs526.utilities.LampStatesConverter;
+
 
 
 /**
@@ -39,6 +41,12 @@ public class LampModel extends AutoLoadedTest {
 	
 	float[] stepChange = {-0.25f, -0.038972f, -0.227396f};
 	
+	static double[] stateParams = {0.300000, 2.216487, -2.094395, 0.208721, 1.745329, -0.428946, 0.261294, 1.745329, -2.022958}; 
+	
+	public LampModel()
+	{
+		super(new LampStatesConverter(), stateParams);
+	}
 	
 	@Override
 	public void initTest(boolean argDeserialized) {

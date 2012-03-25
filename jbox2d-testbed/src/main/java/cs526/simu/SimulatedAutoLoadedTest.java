@@ -40,6 +40,7 @@ import org.jbox2d.testbed.framework.TestbedTest;
 
 import cs526.models.CharacterInfo;
 import cs526.models.CharacterModel;
+import cs526.utilities.ParamToStateConverter;
 
 /**
  * Simply extend this class and create a input file with the same name as the
@@ -59,6 +60,8 @@ public abstract class SimulatedAutoLoadedTest implements ContactListener {
 	float frictionMotorTorque = 10.0f;
 	CharacterInfo modelInfo;
 	CharacterModel model;
+	double[] stateParams;
+	ParamToStateConverter converter; 
 World world;
 
 	public World getWorld()
@@ -66,9 +69,11 @@ World world;
 		return world;
 	}
 
-	public SimulatedAutoLoadedTest(World world)
+	public SimulatedAutoLoadedTest(World world, ParamToStateConverter converter, double[] stateParams)
 	{
 		this.world = world;
+		this.converter = converter;
+		this.stateParams = stateParams; 
 	}
 	/**
 	 * @see org.jbox2d.testbed.framework.TestbedTest#initTest(boolean)
@@ -93,7 +98,7 @@ World world;
 	}
 
 	private void createCharater() {
-		modelInfo = new CharacterInfo(this);
+		modelInfo = new CharacterInfo(this, converter.convert(stateParams));
 		model = new CharacterModel(getWorld(), modelInfo, frictionMotorTorque);
 	}
 

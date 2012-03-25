@@ -53,9 +53,9 @@ public class CharacterModel {
 		controllers = createControllers(this.world, characterInfo, joints);
 	}
 	
-	public void setNewTargetAngleCompensate(String jointName, float targetAngle)
+	public void setNewTargetAngleCompensate(String jointName, double targetAngle)
 	{
-		targetAngleCompensates.put(jointName, targetAngle);
+		targetAngleCompensates.put(jointName, (float)targetAngle);
 	}
 	
 	public Body getLinkByName(String linkName)

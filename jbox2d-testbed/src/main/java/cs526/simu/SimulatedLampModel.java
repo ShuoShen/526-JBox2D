@@ -35,6 +35,8 @@ import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.World;
 import org.jbox2d.testbed.framework.TestbedSettings;
 
+import cs526.utilities.LampStatesConverter;
+
 
 
 /**
@@ -43,10 +45,19 @@ import org.jbox2d.testbed.framework.TestbedSettings;
 public class SimulatedLampModel extends SimulatedAutoLoadedTest {
 	
 	float[] stepChange = {0.185806f, 0.267656f, 0.092896f};
-	
-	public SimulatedLampModel(World world, float[] stepChange)
+
+	/**
+	 * @param world
+	 * @param stepChange
+	 * @param params
+	 * s1, s2, s3 (seconds)
+	 * j11, j12, j21, j22, j31, j32 (in rad)
+	 */
+	public SimulatedLampModel(World world, double[] params)
 	{
-		super(world);
+		super(world, new LampStatesConverter(), params);
+		
+		
 		this.stepChange = stepChange.clone();  
 		
 		

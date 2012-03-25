@@ -35,6 +35,7 @@ import org.jbox2d.testbed.framework.TestbedTest;
 
 import cs526.models.CharacterInfo;
 import cs526.models.CharacterModel;
+import cs526.utilities.ParamToStateConverter;
 
 /**
  * Simply extend this class and create a input file with the same name as the
@@ -51,6 +52,20 @@ public abstract class AutoLoadedTest extends TestbedTest {
 	@Override
 	public boolean isSaveLoadEnabled() {
 		return true;
+	}
+	
+	ParamToStateConverter converter;
+	double[] params;
+	
+	public AutoLoadedTest()
+	{
+		
+	}
+	
+	public AutoLoadedTest(ParamToStateConverter converter, double[] params)
+	{
+		this.converter = converter;
+		this.params = params;
 	}
 
 	float gravity = 0.0f;
@@ -84,7 +99,15 @@ public abstract class AutoLoadedTest extends TestbedTest {
 	}
 
 	private void createCharater() {
-		modelInfo = new CharacterInfo(this);
+		
+		if (converter == null)
+		{
+			modelInfo = new CharacterInfo(this);
+		}
+		else
+			
+			modelInfo = new CharacterInfo(this, converter.convert(params));
+		
 		model = new CharacterModel(getWorld(), modelInfo, frictionMotorTorque);
 	}
 

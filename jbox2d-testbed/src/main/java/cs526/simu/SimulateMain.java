@@ -19,14 +19,27 @@ public class SimulateMain {
 		int hz = 60;
 		int seconds = 30;
 		
-		SimulatedLampModel lamp = getLamp(new float[] {-0.0f, -0.0f, -0.0f});
+		double[] start = new double[] {
+				0.3f, 
+				(float) Math.toRadians(130),
+				(float) Math.toRadians(-120),
+				0.3f,
+				(float) Math.toRadians(100),
+				(float) Math.toRadians(-30),
+				0.3f,
+				(float) Math.toRadians(100),
+				(float) Math.toRadians(-120)
+		};
+		
+		SimulatedLampModel lamp = getLamp(start);
+		
 		System.out.println(jumpForSeconds(lamp, hz, seconds));
 		
-//		SimulatedBipedWalker walker = getWalker(new float[] { -2.961200f, 1.656718f, 0.264455f});
+//		SimulatedBipedWalker walker = getWalker(new float[] { -5f, 0f, 0f});
 //		System.out.println(walkForSeconds(walker, hz, seconds));
 		
-//		hillClimbing(new float[] {-5f, 0f, 0.0f}, 0.4f, 30, hz, seconds);
-		hillClimbingForLamp(new float[]{-0.0f, -0.0f, -0.0f}, 0.1f, 30, hz, seconds);
+//		hillClimbing(new float[] {-5f, 0f, 0.0f}, 1f, 30, hz, seconds);
+		hillClimbingForLamp(start, 0.1f, 30, hz, seconds);
 		
 		System.out.println("done");
 		
@@ -65,7 +78,7 @@ public class SimulateMain {
 			return walker.getComX();
 	}
 	
-	private static SimulatedBipedWalker getWalker(float[] dths) {
+	private static SimulatedBipedWalker getWalker(double[] dths) {
 		Vec2  gravity = new Vec2(0.0f, -1.0f);
 		boolean doSleep = true;
 		World world = new World(gravity, doSleep);
@@ -87,29 +100,36 @@ public class SimulateMain {
 	}
 	
 	
-	private static SimulatedLampModel getLamp(float[] timeChange) {
+	/**
+	 * @param params
+	 * 	 * @param params
+	 * s1, s2, s3 (seconds)
+	 * j11, j12, j21, j22, j31, j32 (in rad)
+	 * @return
+	 */
+	private static SimulatedLampModel getLamp(double[] params) {
 		Vec2  gravity = new Vec2(0.0f, -10.0f);
 		boolean doSleep = true;
 		World world = new World(gravity, doSleep);
 				
-		SimulatedLampModel lamp = new SimulatedLampModel(world, timeChange);
+		SimulatedLampModel lamp = new SimulatedLampModel(world, params);
 		lamp.initTest();
 		return lamp;
 	}
 	
-	public static void hillClimbingForLamp(float[] start, float stepLimit, int attempts, int hz, int seconds)
+	public static void hillClimbingForLamp(double[] start, float stepLimit, int attempts, int hz, int seconds)
 	{
 	
 		int iterations = 100;
 		
-		float[] current = start.clone();
+		double[] current = start.clone();
 		SimulatedLampModel lamp = getLamp(current);
-		float currentEval = jumpForSeconds(lamp, hz, seconds);
+		double currentEval = jumpForSeconds(lamp, hz, seconds);
 		for (int i = 0; i < iterations; i++)
 		{
-			float[] maxNode = current;
-			float maxEval = currentEval;
-			for (float[] next : neighbours(current, stepLimit, attempts))
+			double[] maxNode = current;
+			double maxEval = currentEval;
+			for (double[] next : neighbours(current, stepLimit, attempts))
 			{
 				lamp = getLamp(next);
 				float nextEval = jumpForSeconds(lamp, hz, seconds);
@@ -126,7 +146,7 @@ public class SimulateMain {
 			else
 			{
 				System.out.printf("iteration %d, maxEval %.2f ", i, maxEval);
-				for (float f : maxNode)
+				for (double f : maxNode)
 				{
 					System.out.printf("%f, ", f);
 				}
@@ -137,22 +157,22 @@ public class SimulateMain {
 		}
 	}
 	
-	public static void hillClimbing(float[] start, float stepLimit, int attempts, int hz, int seconds)
+	public static void hillClimbing(double[] start, double stepLimit, int attempts, int hz, int seconds)
 	{
 	
 		int iterations = 100;
 		
-		float[] current = start.clone();
+		double[] current = start.clone();
 		SimulatedBipedWalker walker = getWalker(current);
-		float currentEval = walkForSeconds(walker, hz, seconds);
+		double currentEval = walkForSeconds(walker, hz, seconds);
 		for (int i = 0; i < iterations; i++)
 		{
-			float[] maxNode = current;
-			float maxEval = currentEval;
-			for (float[] next : neighbours(current, stepLimit, attempts))
+			double[] maxNode = current;
+			double maxEval = currentEval;
+			for (double[] next : neighbours(current, stepLimit, attempts))
 			{
 				walker = getWalker(next);
-				float nextEval = walkForSeconds(walker, hz, seconds);
+				double nextEval = walkForSeconds(walker, hz, seconds);
 				if (nextEval > maxEval)
 				{
 					maxNode = next;
@@ -166,7 +186,7 @@ public class SimulateMain {
 			else
 			{
 				System.out.printf("iteration %d, maxEval %.2f ", i, maxEval);
-				for (float f : maxNode)
+				for (double f : maxNode)
 				{
 					System.out.printf("%f, ", f);
 				}
@@ -177,11 +197,11 @@ public class SimulateMain {
 		}
 	}
 	
-	public static ArrayList<float[]> neighbours(float[] current, float stepLimit, int attempts)
+	public static ArrayList<double[]> neighbours(double[] current, double stepLimit, int attempts)
 	{
 		
 		
-		ArrayList<float[]> results = new ArrayList<float[]>();
+		ArrayList<double[]> results = new ArrayList<double[]>();
 //		float[] steps = new float[]{-.5f, .5f};
 		
 		for (int i = 0; i < current.length; i++)
@@ -190,7 +210,7 @@ public class SimulateMain {
 			{
 				Random random = new Random();
 				
-				float[] next = current.clone();
+				double[] next = current.clone();
 				next[i] = current[i] + stepLimit * 2  * (random.nextFloat() - 0.5f); 
 				results.add(next);
 			}
