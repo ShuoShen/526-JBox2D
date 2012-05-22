@@ -603,9 +603,10 @@ public abstract class TestbedTest implements ContactListener, ObjectListener,
 
 		pointCount = 0;
 
-		m_world.step(timeStep,
-				settings.getSetting(TestbedSettings.VelocityIterations).value,
-				settings.getSetting(TestbedSettings.PositionIterations).value);
+		for (int i = 0; i < Math.max(1,(hz) / 60); i++)
+			m_world.step(timeStep,
+					settings.getSetting(TestbedSettings.VelocityIterations).value,
+					settings.getSetting(TestbedSettings.PositionIterations).value);
 
 		m_world.drawDebugData();
 

@@ -1,6 +1,9 @@
 package cs526.simu;
 
 import java.awt.List;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -11,6 +14,8 @@ import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.FixtureDef;
 import org.jbox2d.dynamics.World;
+
+import fr.inria.optimization.cmaes.fitness.IObjectiveFunction;
 
 public class SimulateMain {
 	public static void main(String[] args)
@@ -30,16 +35,79 @@ public class SimulateMain {
 				(float) Math.toRadians(100),
 				(float) Math.toRadians(-120)
 		};
+		System.out.println("initial point: \n");
+		for (int i = 0; i < start.length; i++)
+		{
+			System.out.printf("%f, ", start[i]);
+		}
 		
-		SimulatedLampModel lamp = getLamp(start);
 		
-		System.out.println(jumpForSeconds(lamp, hz, seconds));
+		System.out.println();
 		
-//		SimulatedBipedWalker walker = getWalker(new float[] { -5f, 0f, 0f});
-//		System.out.println(walkForSeconds(walker, hz, seconds));
 		
-//		hillClimbing(new float[] {-5f, 0f, 0.0f}, 1f, 30, hz, seconds);
-		hillClimbingForLamp(start, 0.1f, 30, hz, seconds);
+		PrintStream print = null; 
+		try {
+			print = new PrintStream(new File("result.csv"));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+				
+		int iter = 1;
+		ArrayList<Double> results = new ArrayList<Double>();
+		ArrayList<Integer> evalCounts = new ArrayList<Integer>();
+		
+		for (int it = 0; it < iter; it++)
+		{
+			LampObjectiveFunction func = new LampObjectiveFunction();
+			Optimizer optimizer = new GradientDecentOptimizer();
+			
+			
+			double[] best = optimizer.optimize(func, start, 100);
+			
+			for (int i = 0; i < best.length; i++)
+			{
+				System.out.printf("%f, ", best[i]);
+			}
+			
+			double eval = func.valueOf(best);
+			
+			
+			System.out.println();
+			results.add(eval);
+			evalCounts.add(func.evalCount());
+		}
+		
+		for (double d : results)
+		{
+			print.printf("%f , ", d);
+			
+		}
+		print.println();
+		
+		for (int i : evalCounts)
+		{
+			print.printf("%d , ", i);
+		}
+		
+		try{
+			print.close();
+		}
+		catch (Exception ex)
+		{
+			
+		}
+		
+//		SimulatedLampModel lamp = getLamp(start);
+//		
+//		System.out.println(jumpForSeconds(lamp, hz, seconds));
+//		
+////		SimulatedBipedWalker walker = getWalker(new float[] { -5f, 0f, 0f});
+////		System.out.println(walkForSeconds(walker, hz, seconds));
+//		
+////		hillClimbing(new float[] {-5f, 0f, 0.0f}, 1f, 30, hz, seconds);
+//		hillClimbingForLamp(start, 0.1f, 30, hz, seconds);
 		
 		System.out.println("done");
 		
@@ -119,20 +187,21 @@ public class SimulateMain {
 	
 	public static void hillClimbingForLamp(double[] start, float stepLimit, int attempts, int hz, int seconds)
 	{
-	
+		IObjectiveFunction func = new LampObjectiveFunction();
+		
 		int iterations = 100;
 		
 		double[] current = start.clone();
-		SimulatedLampModel lamp = getLamp(current);
-		double currentEval = jumpForSeconds(lamp, hz, seconds);
+//		SimulatedLampModel lamp = getLamp(current);
+		double currentEval = func.valueOf(current); //jumpForSeconds(lamp, hz, seconds);
 		for (int i = 0; i < iterations; i++)
 		{
 			double[] maxNode = current;
 			double maxEval = currentEval;
 			for (double[] next : neighbours(current, stepLimit, attempts))
 			{
-				lamp = getLamp(next);
-				float nextEval = jumpForSeconds(lamp, hz, seconds);
+//				lamp = getLamp(next);
+				double nextEval = func.valueOf(next); //jumpForSeconds(lamp, hz, seconds);
 				if (nextEval > maxEval)
 				{
 					maxNode = next;

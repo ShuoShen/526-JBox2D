@@ -57,6 +57,7 @@ import org.jbox2d.testbed.tests.RevoluteTest;
 import org.jbox2d.testbed.tests.SensorTest;
 import org.jbox2d.testbed.tests.ShapeEditing;
 import org.jbox2d.testbed.tests.SliderCrankTest;
+import org.jbox2d.testbed.tests.SoftBody;
 import org.jbox2d.testbed.tests.SphereStack;
 import org.jbox2d.testbed.tests.TheoJansen;
 import org.jbox2d.testbed.tests.VaryingFrictionTest;
@@ -79,7 +80,9 @@ import cs526.jbox2dTests.StickTest;
 public class TestList {
   
   public static void populateModel(TestbedModel argModel){
-      
+	  argModel.addCategory("hand");
+	  argModel.addTest(new SoftBody());
+	  
 	  argModel.addCategory("526 Project");
 	  
 	  argModel.addTest(new BipedWalker());
@@ -130,6 +133,7 @@ public class TestList {
       argModel.addTest(new LineJointTest());
       argModel.addTest(new Gears());
       argModel.addTest(new Web());
+      
       argModel.addTest(new Chain());
       argModel.addTest(new Cantilever());
       argModel.addTest(new SliderCrankTest());

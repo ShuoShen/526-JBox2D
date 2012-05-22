@@ -44,7 +44,9 @@ import cs526.utilities.LampStatesConverter;
  */
 public class SimulatedLampModel extends SimulatedAutoLoadedTest {
 	
-	float[] stepChange = {0.185806f, 0.267656f, 0.092896f};
+	float[] stepChange = {0.0f, 0.0f, 0.0f};
+	
+	//float[] stepChange = {0.185806f, 0.267656f, 0.092896f};
 
 	/**
 	 * @param world
@@ -60,18 +62,18 @@ public class SimulatedLampModel extends SimulatedAutoLoadedTest {
 		
 		this.stepChange = stepChange.clone();  
 		
-		
-		try {
-			print = new PrintStream(new File("lamp.csv"));
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		print.println("time velocity");
+//		
+//		try {
+//			print = new PrintStream(new File("lamp.csv"));
+//		} catch (FileNotFoundException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		
+//		print.println("time velocity");
 		
 	}
-	PrintStream print;
+//	PrintStream print;
 	@Override
 	public void initTest() {
 		gravity = DEFAULT_GRAVITY - gravity;
@@ -105,7 +107,7 @@ public class SimulatedLampModel extends SimulatedAutoLoadedTest {
 		{
 			float time = (float) stepCount / hz;
 			float velocity = getComVelocityX();
-			print.printf("%f %f\n", time, velocity);
+//			print.printf("%f %f\n", time, velocity);
 		}
 		
 		
